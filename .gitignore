@@ -1,0 +1,14 @@
+# Ignore object, executable and temporal files.
+*.o
+*.exe
+tmp*
+temp*
+test*
+
+# Ignore images and pdfs.
+*.png
+*.pdf
+
+# Ignore the following subdirectories:
+mod_files/
+obj_files/
