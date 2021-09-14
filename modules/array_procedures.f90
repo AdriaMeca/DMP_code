@@ -9,13 +9,13 @@ module array_procedures
     double precision, dimension(:), allocatable :: array
   end type
 
-  !Pair of integers.
-  type, public :: int_int
-    integer :: x, y
-  end type int_int
-
   !List of integers.
   type, public :: int_list
     integer, dimension(:), allocatable :: array
   end type int_list
+
+  !Pair of integers.
+  type, public :: int_pair
+    integer :: x, y
+  end type int_pair
 end module array_procedures
