@@ -23,9 +23,28 @@ module array_procedures
     module procedure add_int, add_int_list, add_int_pair
   end interface add_item
 
-  public add_item, del_int, pop
+  public add_item, del_int, find_int, pop
 
 contains
+  !Function that searches the index of an integer in a list of integers.
+  function find_int(list, element) result(index)
+    implicit none
+
+    integer, dimension(:), intent(in) :: list
+    integer, intent(in) :: element
+
+    integer :: i, index
+
+    index = 0
+    do i = 1, size(list)
+      if (list(i) == element) then
+        index = i
+        exit
+      end if
+    end do
+  end function find_int
+
+
   !Function that returns a list without the element placed at index.
   function pop(list, index) result(reduced_list)
     implicit none
