@@ -70,4 +70,56 @@ contains
 
     counter = counter + 1
   end subroutine rewiring
+
+
+  !Subroutine that modifies the connections of a network using a standard rewiring
+  !algorithm.
+  subroutine std_rewiring(network, N, c, q)
+    implicit none
+
+    double precision, intent(in) :: q
+    integer, intent(in) :: c, N
+    type(node), dimension(:), intent(inout) :: network
+
+    double precision :: r1, r2(2), r3(2)
+    integer :: i, index_i, j, k, m
+
+    do index_i = 1, N*c/4
+      call random_number(r1)
+
+      if (r1 < q) then
+        do while (.true.)
+          call random_number(r2)
+
+          !We choose two random nodes from the network.
+          i = 1 + floor(N*r2(1))
+          k = 1 + floor(N*r2(2))
+
+          !If i and k are different and disconnected, we proceed.
+          if ((i /= k).and.(all(network(i)%neighbors /= k))) then
+            call random_number(r3)
+
+            !We choose two random neighbors of i and k, respectively.
+            j = network(i)%neighbors(1 + floor(size(network(i)%neighbors)*r3(1)))
+            m = network(k)%neighbors(1 + floor(size(network(k)%neighbors)*r3(2)))
+
+            !If j and m are different and disconnected, we proceed.
+            if ((j /= m).and.(all(network(j)%neighbors /= m))) exit
+          end if
+        end do
+
+        !We remove the previous connections.
+        call del_int(network(i)%neighbors, j)
+        call del_int(network(j)%neighbors, i)
+        call del_int(network(k)%neighbors, m)
+        call del_int(network(m)%neighbors, k)
+
+        !We add the new connections.
+        call add_item(network(i)%neighbors, k)
+        call add_item(network(k)%neighbors, i)
+        call add_item(network(j)%neighbors, m)
+        call add_item(network(m)%neighbors, j)
+      end if
+    end do
+  end subroutine std_rewiring
 end module network_dynamics
