@@ -14,6 +14,11 @@ module array_procedures
     integer, dimension(:), allocatable :: array
   end type int_list
 
+  !List of lists of integers.
+  type, public :: int_list_list
+    type(int_list), dimension(:), allocatable :: time
+  end type int_list_list
+
   !Pair of integers.
   type, public :: int_pair
     integer :: x, y
