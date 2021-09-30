@@ -1,14 +1,12 @@
 # Ignore object, executable and temporal files.
-*.o
 *.exe
-tmp*
+*.mod
+*.o
+
 temp*
 test*
+tmp*
 
 # Ignore images and pdfs.
-*.png
 *.pdf
-
-# Ignore the following subdirectories:
-mod_files/
-obj_files/
+*.png
