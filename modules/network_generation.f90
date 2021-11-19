@@ -11,9 +11,53 @@ module network_generation
     integer, dimension(:), allocatable :: neighbors, opposites
   end type node
 
-  public random_regular_graph
+  public proximity_network, random_regular_graph
 
 contains
+  !Function that creates a proximity network, i.e., a network in which
+  !short connections are favored. The parameter l0 controls this behavior:
+  !large values of l0 allow the presence of longer links, increasing the density.
+  function proximity_network(N, c, l0) result(network)
+    implicit none
+
+    double precision, intent(in) :: l0
+    integer, intent(in) :: c, N
+    type(node), dimension(N) :: network
+
+    double precision, dimension(N, 2) :: positions
+    double precision, dimension(2) :: ri
+    double precision :: dij, L, pij, random
+
+    integer :: i, j
+
+    L = sqrt(dble(N))
+    pij = c / dble(N)
+
+    !We initialize the positions of the nodes.
+    do i = 1, N
+      allocate(network(i)%neighbors(0))
+
+      call random_number(ri)
+      positions(i, :) = ri
+    end do
+
+    !We connect the nodes.
+    do i = 1, N
+      do j = i+1, N
+        !Distance between nodes i and j.
+        dij = sqrt(sum((positions(i, :)-positions(j, :))**2))
+
+        !We decide if i and j are connected or not.
+        call random_number(random)
+        if (random < pij*exp(-dij/l0)) then
+          call add_item(network(i)%neighbors, j)
+          call add_item(network(j)%neighbors, i)
+        end if
+      end do
+    end do
+  end function proximity_network
+
+
   !Function that creates a random regular graph (RRG), i.e., a network
   !whose nodes have the same number of neighbors c (degree).
   function random_regular_graph(N, c) result(network)
