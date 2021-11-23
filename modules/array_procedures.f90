@@ -28,9 +28,38 @@ module array_procedures
     module procedure add_int, add_int_list, add_int_pair
   end interface add_item
 
-  public add_item, del_int, find_int, pop
+  interface idx_insertion_sort
+    module procedure dbl_idx_insertion_sort, int_idx_insertion_sort
+  end interface idx_insertion_sort
+
+  public add_item, del_int, find_int, idx_insertion_sort, pop
 
 contains
+  !Function that returns the permutation of the indices that orders its
+  !associated list of doubles.
+  function dbl_idx_insertion_sort(list) result(indices)
+    implicit none
+
+    double precision, dimension(:), intent(in) :: list
+    double precision, dimension(size(list)) :: copy_list
+    integer, dimension(size(list)) :: indices
+
+    integer :: i, j
+
+    copy_list = list
+    indices = (/ (i, i=1,size(list)) /)
+    do i = 2, size(list)
+      j = i
+      do while (copy_list(j) < copy_list(j-1))
+        copy_list((/ j-1, j /)) = copy_list((/ j, j-1 /))
+        indices((/ j-1, j /)) = indices((/ j, j-1 /))
+        j = j - 1
+        if (j <= 1) exit
+      end do
+    end do
+  end function dbl_idx_insertion_sort
+
+
   !Function that searches the index of an integer in a list of integers.
   function find_int(list, element) result(index)
     implicit none
@@ -48,6 +77,30 @@ contains
       end if
     end do
   end function find_int
+
+
+  !Function that returns the permutation of the indices that orders its
+  !associated list of integers.
+  function int_idx_insertion_sort(list) result(indices)
+    implicit none
+
+    integer, dimension(:), intent(in) :: list
+    integer, dimension(size(list)) :: copy_list, indices
+
+    integer :: i, j
+
+    copy_list = list
+    indices = (/ (i, i=1,size(list)) /)
+    do i = 2, size(list)
+      j = i
+      do while (copy_list(j) < copy_list(j-1))
+        copy_list((/ j-1, j /)) = copy_list((/ j, j-1 /))
+        indices((/ j-1, j /)) = indices((/ j, j-1 /))
+        j = j - 1
+        if (j <= 1) exit
+      end do
+    end do
+  end function int_idx_insertion_sort
 
 
   !Function that returns a list without the element placed at index.
