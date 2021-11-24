@@ -1,12 +1,13 @@
-# Ignore object, executable and temporal files.
+#Git will ignore all files and directories that contain these patterns.
+*.dat
 *.exe
+*.gnu
 *.mod
 *.o
+*.pdf
+*.png
+*.tex
 
 temp*
 test*
 tmp*
-
-# Ignore images and pdfs.
-*.pdf
-*.png
