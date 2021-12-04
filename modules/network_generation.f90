@@ -38,7 +38,7 @@ contains
       allocate(network(i)%neighbors(0))
 
       call random_number(ri)
-      positions(i, :) = ri
+      positions(i, :) = ri * L
     end do
 
     !We connect the nodes.
