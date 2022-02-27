@@ -6,10 +6,11 @@ module random_number_generator
   private
 
   !Global parameters.
-  double precision, parameter :: inv_maxint=1.d0/2147483647.d0
+  double precision, parameter :: inv_maxint=1.0d0/2147483647.0d0
 
   !Global variables.
-  integer :: ioffset, index1(0:2047), index2(0:2047), irand(0:2047)
+  integer, dimension(0:2047) :: index1, index2, irand
+  integer :: ioffset
 
   public ir1279, ir1279range, r1279, setr1279
 
@@ -19,7 +20,7 @@ contains
 
     integer, intent(inout) :: idum
 
-    double precision, parameter :: am=1.d0/2147483563.d0, eps=1.2d-7, &
+    double precision, parameter :: am=1.0d0/2147483563.0d0, eps=1.2d-7, &
       rnmx=1-eps
     integer, parameter :: im1=2147483563, im2=2147483399, imm1=im1-1, &
       ia1=40014, ia2=40692, iq1=53668, iq2=52774, ir1=12211, ir2=3791, &
