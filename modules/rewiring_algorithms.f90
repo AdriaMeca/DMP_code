@@ -1,6 +1,6 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
-module network_dynamics
+module rewiring_algorithms
   use array_procedures, only : add_item, del_int, find_int, int_list, int_list_list
   use network_generation, only : node
 
@@ -179,4 +179,4 @@ contains
       end if
     end do
   end subroutine uni_rewiring
-end module network_dynamics
+end module rewiring_algorithms
