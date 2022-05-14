@@ -1,4 +1,6 @@
 !Module whose procedures create different networks.
+!Author: Adrià Meca Montserrat.
+!Last modified date: 14/05/22.
 module network_generation
   use array_procedures, only : add_item, int_list, int_pair
 

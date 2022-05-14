@@ -1,4 +1,6 @@
 !Module whose procedures create, modify and study arrays.
+!Author: Adrià Meca Montserrat.
+!Last modified date: 14/05/22.
 module array_procedures
   implicit none
 

@@ -1,4 +1,6 @@
 !Module whose procedures study the properties of networks.
+!Author: Adrià Meca Montserrat.
+!Last modified date: 14/05/22.
 module network_properties
   use network_generation, only : node
 

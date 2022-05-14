@@ -1,5 +1,7 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
+!Author: Adrià Meca Montserrat.
+!Last modified date: 14/05/22.
 module rewiring_algorithms
   use array_procedures, only : add_item, del_int, find_int, int_list, int_list_list
   use network_generation, only : node
