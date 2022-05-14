@@ -35,7 +35,7 @@ contains
 
     !We initialize the positions of the nodes.
     do i = 1, N
-      allocate(network(i)%neighbors(0), network(i)%opposites(0))
+      allocate(network(i)%neighbors(0))
 
       call random_number(ri)
       positions(i, :) = ri * L
@@ -51,9 +51,7 @@ contains
         call random_number(random)
         if (random < pij*exp(-dij/l0)) then
           call add_item(network(i)%neighbors, j)
-          call add_item(network(j)%opposites, size(network(i)%neighbors))
           call add_item(network(j)%neighbors, i)
-          call add_item(network(i)%opposites, size(network(j)%neighbors))
         end if
       end do
     end do
@@ -81,8 +79,7 @@ contains
 
       !Step 1.
       do index_i = 1, N
-        allocate(G(index_i)%array(c), network(index_i)%neighbors(0), &
-          network(index_i)%opposites(0))
+        allocate(G(index_i)%array(c), network(index_i)%neighbors(0))
         do index_j = 1, c
           index_k = index_j + (index_i-1)*c
 
@@ -126,9 +123,7 @@ contains
 
         !We connect u and v.
         call add_item(network(u)%neighbors, v)
-        call add_item(network(v)%opposites, size(network(u)%neighbors))
         call add_item(network(v)%neighbors, u)
-        call add_item(network(u)%opposites, size(network(v)%neighbors))
       end do
 
       !We save the remaining possible links {u, v} inside array_w.
@@ -183,9 +178,7 @@ contains
 
         !We connect u and v.
         call add_item(network(u)%neighbors, v)
-        call add_item(network(v)%opposites, size(network(u)%neighbors))
         call add_item(network(v)%neighbors, u)
-        call add_item(network(u)%opposites, size(network(v)%neighbors))
       end do
 
       !If there are no groups available, we are done.
@@ -193,8 +186,7 @@ contains
 
       deallocate(array_u, array_v, array_w)
       do index_i = 1, N
-        deallocate(G(index_i)%array, network(index_i)%neighbors, &
-          network(index_i)%opposites)
+        deallocate(G(index_i)%array, network(index_i)%neighbors)
       end do
     end do
   end function random_regular_graph
