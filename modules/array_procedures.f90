@@ -49,12 +49,12 @@ contains
     integer :: i, j
 
     copy_list = list
-    indices = (/ (i, i=1,size(list)) /)
+    indices = [(i, i=1,size(list))]
     do i = 2, size(list)
       j = i
       do while (copy_list(j) < copy_list(j-1))
-        copy_list((/ j-1, j /)) = copy_list((/ j, j-1 /))
-        indices((/ j-1, j /)) = indices((/ j, j-1 /))
+        copy_list([j-1, j]) = copy_list([j, j-1])
+        indices([j-1, j]) = indices([j, j-1])
         j = j - 1
         if (j <= 1) exit
       end do
@@ -92,12 +92,12 @@ contains
     integer :: i, j
 
     copy_list = list
-    indices = (/ (i, i=1,size(list)) /)
+    indices = [(i, i=1,size(list))]
     do i = 2, size(list)
       j = i
       do while (copy_list(j) < copy_list(j-1))
-        copy_list((/ j-1, j /)) = copy_list((/ j, j-1 /))
-        indices((/ j-1, j /)) = indices((/ j, j-1 /))
+        copy_list([j-1, j]) = copy_list([j, j-1])
+        indices([j-1, j]) = indices([j, j-1])
         j = j - 1
         if (j <= 1) exit
       end do
@@ -118,7 +118,7 @@ contains
     n = size(list)
     if ((1 <= index).and.(index <= n)) then
       allocate(reduced_list(n-1))
-      reduced_list = (/ list(:index-1), list(index+1:) /)
+      reduced_list = [list(:index-1), list(index+1:)]
     else
       allocate(reduced_list(n))
       reduced_list = list
