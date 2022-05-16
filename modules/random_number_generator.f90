@@ -1,5 +1,5 @@
 !Module whose procedures generate random numbers.
-!Modified by Matteo Palassini & Adrià Meca (19/02/22).
+!Modified by Matteo Palassini & Adrià Meca Montserrat (16/05/22).
 module random_number_generator
   implicit none
 

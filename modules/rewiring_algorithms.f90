@@ -1,10 +1,11 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 14/05/22.
+!Last modified date: 16/05/22.
 module rewiring_algorithms
   use array_procedures, only : add_item, del_int, find_int, int_list, int_list_list
   use network_generation, only : node
+  use random_number_generator, only : r1279
 
   implicit none
 
@@ -86,27 +87,20 @@ contains
     integer, intent(in) :: c, N
     type(node), dimension(:), intent(inout) :: network
 
-    double precision :: r1, r2(2), r3(2)
     integer :: i, idx, j, k, m
 
     do idx = 1, N*c/4
-      call random_number(r1)
-
-      if (r1 < q) then
+      if (r1279() < q) then
         do while (.true.)
-          call random_number(r2)
-
           !We choose two random nodes from the network.
-          i = 1 + floor(N*r2(1))
-          k = 1 + floor(N*r2(2))
+          i = 1 + floor(N*r1279())
+          k = 1 + floor(N*r1279())
 
           !If i and k are different and disconnected, we proceed.
           if ((i /= k).and.(all(network(i)%neighbors /= k))) then
-            call random_number(r3)
-
             !We choose two random neighbors of i and k, respectively.
-            j = network(i)%neighbors(1 + floor(size(network(i)%neighbors)*r3(1)))
-            m = network(k)%neighbors(1 + floor(size(network(k)%neighbors)*r3(2)))
+            j = network(i)%neighbors(1 + floor(size(network(i)%neighbors)*r1279()))
+            m = network(k)%neighbors(1 + floor(size(network(k)%neighbors)*r1279()))
 
             !If j and m are different and disconnected, we proceed.
             if ((j /= m).and.(all(network(j)%neighbors /= m))) exit
@@ -138,34 +132,25 @@ contains
     integer, intent(in) :: c, N
     type(node), dimension(:), intent(inout) :: network
 
-    double precision :: r1, r2(2), r3, r4
     integer :: i, idx, j, jsize, k, m
 
     do idx = 1, N*c/4
-      call random_number(r1)
-
-      if (r1 < q) then
+      if (r1279() < q) then
         do while (.true.)
-          call random_number(r2)
-
           !We choose two random nodes from the network.
-          i = 1 + floor(N*r2(1))
-          k = 1 + floor(N*r2(2))
+          i = 1 + floor(N*r1279())
+          k = 1 + floor(N*r1279())
 
           !If i and k are different and disconnected, we proceed.
           if ((i /= k).and.(all(network(i)%neighbors /= k))) then
-            call random_number(r3)
-
             !We choose a random node from the network.
-            j = 1 + floor(N*r3)
+            j = 1 + floor(N*r1279())
 
             !If j has neighbors we proceed.
             jsize = size(network(j)%neighbors)
             if (jsize > 0) then
-              call random_number(r4)
-
               !We choose a random neighbor of j.
-              m = network(j)%neighbors(1 + floor(jsize*r4))
+              m = network(j)%neighbors(1 + floor(jsize*r1279()))
               exit
             end if
           end if

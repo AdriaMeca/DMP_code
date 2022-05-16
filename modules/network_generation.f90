@@ -1,8 +1,9 @@
 !Module whose procedures create different networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 14/05/22.
+!Last modified date: 16/05/22.
 module network_generation
   use array_procedures, only : add_item, int_list, int_pair
+  use random_number_generator, only : r1279
 
   implicit none
 
@@ -27,20 +28,17 @@ contains
     type(node), dimension(N) :: network
 
     double precision, dimension(N, 2) :: positions
-    double precision, dimension(2) :: ri
-    double precision :: dij, L, pij, random
+    double precision :: dij, L, pij
 
     integer :: i, j
 
     L = sqrt(dble(N))
     pij = c / dble(N)
 
-    !We initialize the positions of the nodes.
+    !We initialize the list of neighbors and the positions of the nodes.
     do i = 1, N
       allocate(network(i)%neighbors(0))
-
-      call random_number(ri)
-      positions(i, :) = ri * L
+      positions(i, :) = L * [r1279(), r1279()]
     end do
 
     !We connect the nodes.
@@ -50,8 +48,7 @@ contains
         dij = sqrt(sum((positions(i, :)-positions(j, :))**2))
 
         !We decide if i and j are connected or not.
-        call random_number(random)
-        if (random < pij*exp(-dij/l0)) then
+        if (r1279() < pij*exp(-dij/l0)) then
           call add_item(network(i)%neighbors, j)
           call add_item(network(j)%neighbors, i)
         end if
@@ -68,7 +65,7 @@ contains
     integer, intent(in) :: c, N
     type(node), dimension(N) :: network
 
-    double precision :: r(2), x
+    double precision :: x
     integer, dimension(:), allocatable :: array_u, array_v
     integer :: i, index_i, index_j, index_k, j, u, v
 
@@ -98,11 +95,9 @@ contains
       !Step 2.
       do while (size(array_v) > c)
         do while (.true.)
-          call random_number(r)
-
           !We choose two points i and j at random.
-          i = array_u(1 + floor(size(array_u)*r(1)))
-          j = array_u(1 + floor(size(array_u)*r(2)))
+          i = array_u(1 + floor(size(array_u)*r1279()))
+          j = array_u(1 + floor(size(array_u)*r1279()))
 
           !i and j belong to groups u and v, respectively.
           u = ceiling(i/real(c))
@@ -141,27 +136,23 @@ contains
       !Step 3.
       do while (size(array_w) > 0)
         do while (.true.)
-          call random_number(r)
-
           !We choose a link at random from array_w.
-          link = array_w(1 + floor(size(array_w)*r(1)))
+          link = array_w(1 + floor(size(array_w)*r1279()))
 
           u = link%x
           v = link%y
 
           !We accept u and v considering their size.
           x = dble(size(G(u)%array) * size(G(v)%array))
-          if (r(2) < x/c**2) exit
+          if (r1279() < x/c**2) exit
         end do
 
         !We remove {u, v} from array_w.
         array_w = pack(array_w, mask=(array_w%x/=u).or.(array_w%y/=v))
 
-        call random_number(r)
-
         !We choose two connections at random from u and v.
-        i = G(u)%array(1 + floor(size(G(u)%array)*r(1)))
-        j = G(v)%array(1 + floor(size(G(v)%array)*r(2)))
+        i = G(u)%array(1 + floor(size(G(u)%array)*r1279()))
+        j = G(v)%array(1 + floor(size(G(v)%array)*r1279()))
 
         !We remove i and j from their groups.
         G(u)%array = pack(G(u)%array, mask=G(u)%array/=i)

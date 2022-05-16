@@ -2,10 +2,11 @@
 !dynamic networks using Monte Carlo algorithms that impose different
 !epidemiological models (SIR).
 !Author: Adrià Meca Montserrat.
-!Last modified date: 15/05/22.
+!Last modified date: 16/05/22.
 module mc_simulations
   use array_procedures, only : int_list_list
   use network_generation, only : node
+  use random_number_generator, only : r1279
 
   implicit none
 
@@ -48,7 +49,7 @@ contains
         !We apply the SIR rules at each t: a node I becomes R with probability mu
         !regardless of its neighbors; a node S becomes I with probability
         !lambda when it makes contact with one of its neighbors.
-        call random_number(r)
+        r = r1279()
         if ((loc_states(i) == 'I').and.(r < mu)) then
           states(i) = 'R'
         else if (loc_states(i) == 'S') then
