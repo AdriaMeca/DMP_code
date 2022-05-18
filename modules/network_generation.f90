@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 16/05/22.
+!Last modified date: 18/05/22.
 module network_generation
   use array_procedures, only : add_item, int_list, int_pair
   use random_number_generator, only : r1279
@@ -10,7 +10,6 @@ module network_generation
   private
 
   type, public :: node
-    character(len=1) :: state
     integer, dimension(:), allocatable :: neighbors, opposites
   end type node
 
