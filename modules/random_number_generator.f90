@@ -1,5 +1,5 @@
 !Module whose procedures generate random numbers.
-!Modified by Matteo Palassini & Adrià Meca Montserrat (16/05/22).
+!Modified by Matteo Palassini & Adrià Meca Montserrat (18/05/22).
 module random_number_generator
   implicit none
 
@@ -84,21 +84,18 @@ contains
   end function ran2
 
 
-  !Function that generates random integers between 0 and maxint.
-  integer function ir1279()
-    implicit none
-
-    ioffset = iand(ioffset+1, 2047)
-    irand(ioffset) = (irand(index1(ioffset)) * irand(index2(ioffset)))
-    ir1279 = ishft(irand(ioffset), -1)
-  end function ir1279
-
-
   !Function that generates random doubles between 0 and 1.
   double precision function r1279()
     implicit none
 
-    r1279 = ir1279() * inv_maxint
+    integer :: ir1279
+
+    !We generate a random integer between 0 and maxint.
+    ioffset = iand(ioffset+1, 2047)
+    irand(ioffset) = irand(index1(ioffset)) * irand(index2(ioffset))
+    ir1279 = ishft(irand(ioffset), -1)
+
+    r1279 = ir1279 * inv_maxint
   end function r1279
 
 
