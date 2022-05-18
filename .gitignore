@@ -1,13 +1,2 @@
-#Git will ignore all files and directories that contain these patterns.
-*.dat
-*.exe
-*.gnu
-*.mod
-*.o
-*.pdf
-*.png
-*.tex
-
-temp*
-test*
-tmp*
+#Ignore the folder where I test the code.
+testing/
