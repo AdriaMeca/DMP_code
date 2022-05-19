@@ -2,7 +2,7 @@
 
 This repository contains the Fortran code I used to simulate epidemics on time-varying networks for my bachelor's thesis, which was supervised by Dr. Matteo Palassini. Now, it has been expanded to contain the code that I am currently using for my master's thesis.
 
-The folder *modules* has several Fortran modules that provide procedures for creating and manipulating different networks. It also contains **dynamic message-passing** algorithms for different epidemiological models (SIR) that provide the marginal probabilities that each node on a network is in a given state at time t.
+The folder *modules* has several Fortran modules that provide procedures for creating and manipulating different networks. It also contains **dynamic message-passing** algorithms for different epidemiological models (SIR and SEIR) that provide the marginal probabilities that each node on a network is in a given state at time t.
 
 The **dynamic message-passing** algorithm gives exact results on tree-like networks and good approximations on real networks. Its complexity is O(cNt), where N is the number of nodes and c is the average number of neighbors each node has.
 
