@@ -1,9 +1,10 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 16/05/22.
+!Last modified date: 21/05/22.
 module rewiring_algorithms
-  use array_procedures, only : add_item, del_int, find_int, int_list, int_list_list
+  use array_procedures, only : add_item, find_int, int_list, int_list_list, &
+    my_pack
   use network_generation, only : node
   use random_number_generator, only : r1279
 
@@ -16,18 +17,23 @@ module rewiring_algorithms
 contains
   !Subroutine that records the changes that a network undergoes over time.
   !It also keeps track of the connections active at a certain time step.
-  subroutine rewiring(type, network, c, history, indices, t0, q)
+  subroutine rewiring(type, network, history, indices, c, t0, q)
     implicit none
 
+    !Input arguments.
     character(len=*), intent(in) :: type
     double precision, intent(in) :: q
     integer, intent(in) :: c, t0
+
+    !Output arguments.
     type(node), dimension(:), intent(inout) :: history, network
     type(int_list_list), dimension(:), intent(inout) :: indices
 
+    !Local variables.
     integer :: altk, i, id_ki, isize, k, N, t
     type(int_list) :: locations
 
+    !Number of nodes.
     N = size(network)
 
     !We initialize history.
@@ -36,7 +42,7 @@ contains
     end do
 
     do t = 1, t0
-      !If the rewiring probability q is greater than 0, we modify the
+      !If the rewiring probability q is greater than 0.0, we modify the
       !network connections.
       if ((t > 1).and.(q > 0.0d0)) then
         select case (type)
@@ -83,10 +89,14 @@ contains
   subroutine std_rewiring(network, N, c, q)
     implicit none
 
+    !Input arguments.
     double precision, intent(in) :: q
     integer, intent(in) :: c, N
+
+    !Output arguments.
     type(node), dimension(:), intent(inout) :: network
 
+    !Local variables.
     integer :: i, idx, j, k, m
 
     do idx = 1, N*c/4
@@ -108,10 +118,10 @@ contains
         end do
 
         !We remove the previous connections.
-        call del_int(network(i)%neighbors, j)
-        call del_int(network(j)%neighbors, i)
-        call del_int(network(k)%neighbors, m)
-        call del_int(network(m)%neighbors, k)
+        call my_pack(network(i)%neighbors, network(i)%neighbors/=j)
+        call my_pack(network(j)%neighbors, network(j)%neighbors/=i)
+        call my_pack(network(k)%neighbors, network(k)%neighbors/=m)
+        call my_pack(network(m)%neighbors, network(m)%neighbors/=k)
 
         !We add the new connections.
         call add_item(network(i)%neighbors, k)
@@ -128,10 +138,14 @@ contains
   subroutine uni_rewiring(network, N, c, q)
     implicit none
 
+    !Input arguments.
     double precision, intent(in) :: q
     integer, intent(in) :: c, N
+
+    !Output arguments.
     type(node), dimension(:), intent(inout) :: network
 
+    !Local variables.
     integer :: i, idx, j, jsize, k, m
 
     do idx = 1, N*c/4
@@ -157,8 +171,8 @@ contains
         end do
 
         !We remove the old connection.
-        call del_int(network(j)%neighbors, m)
-        call del_int(network(m)%neighbors, j)
+        call my_pack(network(j)%neighbors, network(j)%neighbors/=m)
+        call my_pack(network(m)%neighbors, network(m)%neighbors/=j)
 
         !We add the new connection.
         call add_item(network(i)%neighbors, k)
