@@ -1,6 +1,6 @@
 !Module whose procedures create, modify and study arrays.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 16/05/22.
+!Last modified date: 21/05/22.
 module array_procedures
   implicit none
 
@@ -34,17 +34,26 @@ module array_procedures
     module procedure dbl_idx_insertion_sort, int_idx_insertion_sort
   end interface idx_insertion_sort
 
-  public add_item, del_int, find_int, idx_insertion_sort, pop, quicksort
+  interface my_pack
+    module procedure my_pack_int, my_pack_int_pair
+  end interface my_pack
+
+  public add_item, find_int, idx_insertion_sort, my_pack, pop, quicksort
 
 contains
   !Function that searches the index of an integer in a list of integers.
   function find_int(list, element) result(index)
     implicit none
 
+    !Input arguments.
     integer, dimension(:), intent(in) :: list
     integer, intent(in) :: element
 
-    integer :: i, index
+    !Output arguments.
+    integer :: index
+
+    !Local variables.
+    integer :: i
 
     index = 0
     do i = 1, size(list)
@@ -61,10 +70,14 @@ contains
   function dbl_idx_insertion_sort(list) result(indices)
     implicit none
 
+    !Input arguments.
     double precision, dimension(:), intent(in) :: list
-    double precision, dimension(size(list)) :: copy_list
+
+    !Output arguments.
     integer, dimension(size(list)) :: indices
 
+    !Local variables.
+    double precision, dimension(size(list)) :: copy_list
     integer :: i, j
 
     copy_list = list
@@ -86,9 +99,14 @@ contains
   function int_idx_insertion_sort(list) result(indices)
     implicit none
 
+    !Input arguments.
     integer, dimension(:), intent(in) :: list
-    integer, dimension(size(list)) :: copy_list, indices
 
+    !Output arguments.
+    integer, dimension(size(list)) :: indices
+
+    !Local variables.
+    integer, dimension(size(list)) :: copy_list
     integer :: i, j
 
     copy_list = list
@@ -109,10 +127,14 @@ contains
   function pop(list, index) result(reduced_list)
     implicit none
 
+    !Input arguments.
     double precision, dimension(:), intent(in) :: list
     integer, intent(in) :: index
 
+    !Output arguments.
     double precision, dimension(:), allocatable :: reduced_list
+
+    !Local variables.
     integer :: n
 
     n = size(list)
@@ -130,9 +152,11 @@ contains
   subroutine add_dbl(list, element)
     implicit none
 
+    !Input/output arguments.
     double precision, dimension(:), allocatable, intent(inout) :: list
     double precision, intent(in) :: element
 
+    !Local variables.
     double precision, dimension(:), allocatable :: copy_list
     integer :: isize
 
@@ -165,9 +189,11 @@ contains
   subroutine add_int(list, element)
     implicit none
 
+    !Input/output arguments.
     integer, dimension(:), allocatable, intent(inout) :: list
     integer, intent(in) :: element
 
+    !Local variables.
     integer, dimension(:), allocatable :: copy_list
     integer :: isize
 
@@ -200,9 +226,11 @@ contains
   subroutine add_int_list(list, element)
     implicit none
 
+    !Input/output arguments.
     type(int_list), dimension(:), allocatable, intent(inout) :: list
     type(int_list), intent(in) :: element
 
+    !Local variables.
     type(int_list), dimension(:), allocatable :: copy_list
     integer :: isize
 
@@ -235,9 +263,11 @@ contains
   subroutine add_int_pair(list, element)
     implicit none
 
+    !Input/output arguments.
     type(int_pair), dimension(:), allocatable, intent(inout) :: list
     type(int_pair), intent(in) :: element
 
+    !Local variables.
     type(int_pair), dimension(:), allocatable :: copy_list
     integer :: isize
 
@@ -266,15 +296,90 @@ contains
   end subroutine add_int_pair
 
 
-  !Subroutine that removes an integer from a list of integers.
-  subroutine del_int(list, element)
+  !Custom version of the PACK function provided by GFortran that applies to
+  !lists of integers.
+  subroutine my_pack_int(list, condition)
     implicit none
 
+    !Input/output arguments.
     integer, dimension(:), allocatable, intent(inout) :: list
-    integer, intent(in) :: element
+    logical, dimension(:), intent(in) :: condition
 
-    if (allocated(list)) list = pack(list, mask=list/=element)
-  end subroutine del_int
+    !Local variables.
+    integer, dimension(:), allocatable :: copy_list
+    integer :: i, j, new_size, old_size
+
+    if (.not.allocated(list)) then
+      print*, 'An attempt was made to filter an unallocated list.'
+      return
+    end if
+
+    !We transfer all elements from list to copy_list.
+    old_size = size(list)
+    allocate(copy_list(old_size))
+    copy_list = list
+
+    !We compute the new size of the list based on the number of true elements
+    !in the boolean array called condition.
+    new_size = count(condition)
+    deallocate(list)
+    allocate(list(new_size))
+
+    !If the new size is greater than zero, we pass all the elements that meet
+    !the condition to our list.
+    if (new_size > 0) then
+      j = 1
+      do i = 1, old_size
+        if (condition(i)) then
+          list(j) = copy_list(i)
+          j = j + 1
+        end if
+      end do
+    end if
+  end subroutine my_pack_int
+
+
+  !Custom version of the PACK function provided by GFortran that applies to
+  !lists of integer pairs.
+  subroutine my_pack_int_pair(list, condition)
+    implicit none
+
+    !Input/output arguments.
+    logical, dimension(:), intent(in) :: condition
+    type(int_pair), dimension(:), allocatable, intent(inout) :: list
+
+    !Local variables.
+    integer :: i, j, new_size, old_size
+    type(int_pair), dimension(:), allocatable :: copy_list
+
+    if (.not.allocated(list)) then
+      print*, 'An attempt was made to filter an unallocated list.'
+      return
+    end if
+
+    !We transfer all elements from list to copy_list.
+    old_size = size(list)
+    allocate(copy_list(old_size))
+    copy_list = list
+
+    !We compute the new size of the list based on the number of true elements
+    !in the boolean array called condition.
+    new_size = count(condition)
+    deallocate(list)
+    allocate(list(new_size))
+
+    !If the new size is greater than zero, we pass all the elements that meet
+    !the condition to our list.
+    if (new_size > 0) then
+      j = 1
+      do i = 1, old_size
+        if (condition(i)) then
+          list(j) = copy_list(i)
+          j = j + 1
+        end if
+      end do
+    end if
+  end subroutine my_pack_int_pair
 
 
   !Recursive subroutine that sorts two lists in ascending order from the values
@@ -282,9 +387,11 @@ contains
   recursive subroutine quicksort(energies, node_ids)
     implicit none
 
+    !Input/output arguments.
     double precision, dimension(:), intent(inout) :: energies
     integer, dimension(:), intent(inout) :: node_ids
 
+    !Local variables.
     double precision, dimension(:), allocatable :: e_eq, e_gt, e_lt
     double precision, parameter :: eps=1.0d-12
     double precision :: e, pivot
@@ -326,7 +433,7 @@ contains
       call quicksort(e_lt, n_lt)
       call quicksort(e_gt, n_gt)
 
-      !Finally, we construct the sorted lists using automatic reallocation.
+      !Finally, we construct the sorted lists.
       energies = [e_lt, e_eq, e_gt]
       node_ids = [n_lt, n_eq, n_gt]
     end if
