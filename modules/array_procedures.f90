@@ -42,7 +42,7 @@ module array_procedures
 
 contains
   !Function that searches the index of an integer in a list of integers.
-  function find_int(list, element) result(index)
+  function find_int(list, element)
     implicit none
 
     !Input arguments.
@@ -50,15 +50,15 @@ contains
     integer, intent(in) :: element
 
     !Output arguments.
-    integer :: index
+    integer :: find_int
 
     !Local variables.
     integer :: i
 
-    index = 0
+    find_int = 0
     do i = 1, size(list)
       if (list(i) == element) then
-        index = i
+        find_int = i
         exit
       end if
     end do
@@ -67,26 +67,26 @@ contains
 
   !Function that returns the permutation of the indices that orders its
   !associated list of doubles.
-  function dbl_idx_insertion_sort(list) result(indices)
+  function dbl_idx_insertion_sort(list)
     implicit none
 
     !Input arguments.
     double precision, dimension(:), intent(in) :: list
 
     !Output arguments.
-    integer, dimension(size(list)) :: indices
+    integer, dimension(size(list)) :: dbl_idx_insertion_sort
 
     !Local variables.
     double precision, dimension(size(list)) :: copy_list
     integer :: i, j
 
     copy_list = list
-    indices = [(i, i=1,size(list))]
+    dbl_idx_insertion_sort = [(i, i=1,size(list))]
     do i = 2, size(list)
       j = i
       do while (copy_list(j) < copy_list(j-1))
         copy_list([j-1, j]) = copy_list([j, j-1])
-        indices([j-1, j]) = indices([j, j-1])
+        dbl_idx_insertion_sort([j-1, j]) = dbl_idx_insertion_sort([j, j-1])
         j = j - 1
         if (j <= 1) exit
       end do
@@ -96,26 +96,26 @@ contains
 
   !Function that returns the permutation of the indices that orders its
   !associated list of integers.
-  function int_idx_insertion_sort(list) result(indices)
+  function int_idx_insertion_sort(list)
     implicit none
 
     !Input arguments.
     integer, dimension(:), intent(in) :: list
 
     !Output arguments.
-    integer, dimension(size(list)) :: indices
+    integer, dimension(size(list)) :: int_idx_insertion_sort
 
     !Local variables.
     integer, dimension(size(list)) :: copy_list
     integer :: i, j
 
     copy_list = list
-    indices = [(i, i=1,size(list))]
+    int_idx_insertion_sort = [(i, i=1,size(list))]
     do i = 2, size(list)
       j = i
       do while (copy_list(j) < copy_list(j-1))
         copy_list([j-1, j]) = copy_list([j, j-1])
-        indices([j-1, j]) = indices([j, j-1])
+        int_idx_insertion_sort([j-1, j]) = int_idx_insertion_sort([j, j-1])
         j = j - 1
         if (j <= 1) exit
       end do
@@ -124,7 +124,7 @@ contains
 
 
   !Function that returns a list without the element placed at index.
-  function pop(list, index) result(reduced_list)
+  function pop(list, index)
     implicit none
 
     !Input arguments.
@@ -132,18 +132,18 @@ contains
     integer, intent(in) :: index
 
     !Output arguments.
-    double precision, dimension(:), allocatable :: reduced_list
+    double precision, dimension(:), allocatable :: pop
 
     !Local variables.
     integer :: n
 
     n = size(list)
     if ((1 <= index).and.(index <= n)) then
-      allocate(reduced_list(n-1))
-      reduced_list = [list(:index-1), list(index+1:)]
+      allocate(pop(n-1))
+      pop = [list(:index-1), list(index+1:)]
     else
-      allocate(reduced_list(n))
-      reduced_list = list
+      allocate(pop(n))
+      pop = list
     end if
   end function pop
 
