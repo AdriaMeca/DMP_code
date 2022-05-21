@@ -1,6 +1,6 @@
 !Module whose procedures study the properties of networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 14/05/22.
+!Last modified date: 21/05/22.
 module network_properties
   use network_generation, only : node
 
@@ -11,26 +11,18 @@ module network_properties
   public edges, mean_degree
 
 contains
-  !Function that calculates the mean degree of a network.
-  double precision function mean_degree(network)
-    implicit none
-
-    type(node), dimension(:), intent(in) :: network
-
-    integer :: N
-
-    N = size(network)
-    mean_degree = connection_points(network) / dble(N)
-  end function mean_degree
-
-
-  !Function that calculates the total number of connection points in a network.
+  !Function that calculates the total number of connection points of a network.
   !In other words, it computes the sum over the degree of each node in a graph.
-  integer function connection_points(network)
+  function connection_points(network)
     implicit none
 
+    !Input arguments.
     type(node), dimension(:), intent(in) :: network
 
+    !Output arguments.
+    integer :: connection_points
+
+    !Local variables.
     integer :: i
 
     connection_points = 0
@@ -41,11 +33,29 @@ contains
 
 
   !Function that calculates the number of edges of a network.
-  integer function edges(network)
+  function edges(network)
     implicit none
 
+    !Input arguments.
     type(node), dimension(:), intent(in) :: network
+
+    !Output arguments.
+    integer :: edges
 
     edges = connection_points(network) / 2
   end function edges
+
+
+  !Function that calculates the mean degree of a network.
+  function mean_degree(network)
+    implicit none
+
+    !Input arguments.
+    type(node), dimension(:), intent(in) :: network
+
+    !Output arguments.
+    double precision :: mean_degree
+
+    mean_degree = connection_points(network) / dble(size(network))
+  end function mean_degree
 end module network_properties

@@ -1,5 +1,5 @@
 !Module whose procedures generate random numbers.
-!Modified by Matteo Palassini & Adrià Meca Montserrat (18/05/22).
+!Modified by Matteo Palassini and Adrià Meca Montserrat (21/05/22).
 module random_number_generator
   implicit none
 
@@ -7,7 +7,6 @@ module random_number_generator
 
   !Global parameters.
   double precision, parameter :: inv_maxint=1.0d0/2147483647.0d0
-
   !Global variables.
   integer, dimension(0:2047) :: index1, index2, irand
   integer :: ioffset
@@ -22,17 +21,22 @@ contains
   !sequence. The variable rnmx should approximate the largest float value that
   !is less than 1. This function has been taken from the book: Numerical Recipes
   !in Fortran 77, and modified so that gfortran stops complaining so much.
-  double precision function ran2(idum)
+  function ran2(idum)
     implicit none
 
+    !Input arguments.
     integer, intent(inout) :: idum
 
+    !Output arguments.
+    double precision :: ran2
+
+    !Local parameters.
     double precision, parameter :: am=1.0d0/2147483563.0d0, eps=1.2d-7, &
       rnmx=1-eps
     integer, parameter :: im1=2147483563, im2=2147483399, imm1=im1-1, &
       ia1=40014, ia2=40692, iq1=53668, iq2=52774, ir1=12211, ir2=3791, &
       ntab=32, ndiv=67108862
-
+    !Local variables.
     integer, save :: idum2=123456789, iv(ntab)=ntab*0, iy=0
     integer :: idx1, idx2, j, k
 
@@ -84,10 +88,14 @@ contains
   end function ran2
 
 
-  !Function that generates random doubles between 0 and 1.
-  double precision function r1279()
+  !Function that generates random doubles between 0.0 and 1.0.
+  function r1279()
     implicit none
 
+    !Output arguments.
+    double precision :: r1279
+
+    !Local variables.
     integer :: ir1279
 
     !We generate a random integer between 0 and maxint.
@@ -103,9 +111,12 @@ contains
   subroutine setr1279(iseed)
     implicit none
 
+    !Input arguments.
     integer, intent(in) :: iseed
 
+    !Local parameters.
     integer, parameter :: nbitm1=31
+    !Local variables.
     integer :: ibit, ispoke, one_bit, localseed
 
     !Initialize ioffset. This will be increased by (1 mod 2048) for
