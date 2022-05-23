@@ -14,14 +14,15 @@ module dmp_algorithms
 
 contains
   !DMP algorithm for the SIR and SEIR models.
-  subroutine dmp(type, history, indices, origin, alpha, lambda, mu, nu, t0, &
+  subroutine dmp(type, history, indices, origins, alpha, lambda, mu, nu, t0, &
     ps, pe, pi, pr, tmp_dmp_probs)
     implicit none
 
     !Input arguments.
     character(len=*), intent(in) :: type
     double precision, intent(in) :: alpha, lambda, mu, nu
-    integer, intent(in) :: origin, t0
+    integer, dimension(:), intent(in) :: origins
+    integer, intent(in) :: t0
     type(int_list_list), dimension(:), intent(in) :: indices
     type(node), dimension(:), intent(in) :: history
 
@@ -43,7 +44,7 @@ contains
 
     !Initial conditions for the marginal probabilities.
     ps0 = 1.0d0
-    ps0(origin) = 0.0d0
+    ps0(origins) = 0.0d0
 
     ps = ps0
     pe = 1.0d0 - ps0

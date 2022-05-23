@@ -17,14 +17,15 @@ module mc_simulations
 contains
   !Subroutine that spreads an infection that follows the S(E)IR rules on a network
   !using a Monte Carlo simulation.
-  subroutine mc_sim(type, history, indices, origin, alpha, lambda, mu, nu, t0, &
+  subroutine mc_sim(type, history, indices, origins, alpha, lambda, mu, nu, t0, &
     states, realizations, tmp_mc_probs)
     implicit none
 
     !Input arguments.
     character(len=*), intent(in) :: type
     double precision, intent(in) :: alpha, lambda, mu, nu
-    integer, intent(in) :: origin, realizations, t0
+    integer, dimension(:), intent(in) :: origins
+    integer, intent(in) :: realizations, t0
     type(int_list_list), dimension(:), intent(in) :: indices
     type(node), dimension(:), intent(in) :: history
 
@@ -46,7 +47,7 @@ contains
     do alti = 1, realizations
       !We initialize the array of states.
       states = 'S'
-      states(origin) = 'E'
+      states(origins) = 'E'
       !We initialize an auxiliary array of states.
       auxsts = states
 
