@@ -2,7 +2,7 @@
 !dynamic networks using Monte Carlo algorithms that impose different
 !epidemiological models (SIR and SEIR).
 !Author: Adrià Meca Montserrat.
-!Last modified date: 19/05/22.
+!Last modified date: 23/05/22.
 module mc_simulations
   use array_procedures, only : int_list_list
   use network_generation, only : node
@@ -12,16 +12,17 @@ module mc_simulations
 
   private
 
-  public mc_seir, mc_sir
+  public mc_sim
 
 contains
-  !Subroutine that spreads an infection that follows the SEIR rules on a network
+  !Subroutine that spreads an infection that follows the S(E)IR rules on a network
   !using a Monte Carlo simulation.
-  subroutine mc_seir(history, indices, origin, alpha, lambda, mu, nu, t0, &
+  subroutine mc_sim(type, history, indices, origin, alpha, lambda, mu, nu, t0, &
     states, realizations, tmp_mc_probs)
     implicit none
 
     !Input arguments.
+    character(len=*), intent(in) :: type
     double precision, intent(in) :: alpha, lambda, mu, nu
     integer, intent(in) :: origin, realizations, t0
     type(int_list_list), dimension(:), intent(in) :: indices
@@ -32,8 +33,11 @@ contains
     double precision, dimension(:, :), intent(out) :: tmp_mc_probs
 
     !Local variables.
+    character(len=1), dimension(size(history)) :: auxsts
     double precision, dimension(t0, 4) :: mc_probs
-    integer :: alti, i, N, t
+    double precision :: p1, p2, r
+    integer, dimension(:), allocatable :: nbrs
+    integer :: alti, i, isize, N, t
 
     !Number of nodes.
     N = size(history)
@@ -43,11 +47,39 @@ contains
       !We initialize the array of states.
       states = 'S'
       states(origin) = 'E'
+      !We initialize an auxiliary array of states.
+      auxsts = states
 
       mc_probs = 0.0d0
       do t = 1, t0
-        !We apply the MC kernel to modify the states using the SEIR rules.
-        call mc_seir_kernel(history, indices, alpha, lambda, mu, nu, t, states)
+        !We apply the MC core to modify the states using the S(E)IR rules.
+        do i = 1, N
+          !We compute the neighbors of node i at time t.
+          isize = size(indices(i)%time(t)%array)
+          allocate(nbrs(isize))
+          nbrs = history(i)%neighbors(indices(i)%time(t)%array)
+
+          !We apply the S(E)IR rules at each t: an E (exposed) node becomes I with
+          !probability nu, and an I node becomes R with probability mu, regardless
+          !of their respective neighbors; a S node becomes E with probability alpha
+          !when it makes contact with one of its E neighbors (modified SEIR); also,
+          !it becomes E with probability lambda when it interacts with one of its I
+          !neighbors.
+          r = r1279()
+          if ((auxsts(i) == 'E').and.(r < nu)) then
+            states(i) = 'I'
+          else if ((auxsts(i) == 'I').and.(r < mu)) then
+            states(i) = 'R'
+          else if (auxsts(i) == 'S') then
+            p1 = 1.0d0 - product(1.0d0-alpha*merge(1, 0, auxsts(nbrs)=='E'))
+            p2 = 1.0d0 - product(1.0d0-lambda*merge(1, 0, auxsts(nbrs)=='I'))
+            if (r < p1+p2) states(i) = 'E'
+          end if
+
+          deallocate(nbrs)
+        end do
+        !We update auxsts at the end of each time step.
+        auxsts = states
 
         !We count the number of nodes that are in each state at time t.
         do i = 1, N
@@ -71,112 +103,21 @@ contains
     !We divide the cumulative trajectory by the number of realizations, thus
     !obtaining the average trajectory.
     tmp_mc_probs = tmp_mc_probs / realizations
-  end subroutine mc_seir
 
+    !If we are considering the SIR model, in the end we have to perform the
+    !following exchanges: (PE, PI, PR) --> (0.0, PE, PI) and ('E', 'I') -->
+    !('I', 'R').
+    if (type == 'SIR') then
+      tmp_mc_probs(:, 3:4) = tmp_mc_probs(:, 2:3)
+      tmp_mc_probs(:, 2) = 0.0d0
 
-  !Kernel of the Monte Carlo simulation that applies the SEIR rules at each t.
-  subroutine mc_seir_kernel(history, indices, alpha, lambda, mu, nu, t, states)
-    implicit none
-
-    !Input arguments.
-    double precision, intent(in) :: alpha, lambda, mu, nu
-    integer, intent(in) :: t
-    type(int_list_list), dimension(:), intent(in) :: indices
-    type(node), dimension(:), intent(in) :: history
-
-    !Output arguments.
-    character(len=1), dimension(:), intent(inout) :: states
-
-    !Local variables.
-    character(len=1), dimension(size(history)) :: loc_states
-    double precision :: p1, p2, r
-    integer, dimension(:), allocatable :: nbrs
-    integer :: i, isize, N
-
-    !Number of nodes.
-    N = size(history)
-
-    !We initialize an auxiliary array of states.
-    loc_states = states
-    do i = 1, N
-      !We compute the neighbors of node i at time t.
-      isize = size(indices(i)%time(t)%array)
-      allocate(nbrs(isize))
-      nbrs = history(i)%neighbors(indices(i)%time(t)%array)
-
-      !We apply the SEIR rules at each t: an E (exposed) node becomes I with
-      !probability nu, and an I node becomes R with probability mu, regardless
-      !of their respective neighbors; a S node becomes E with probability alpha
-      !when it makes contact with one of its E neighbors (modified SEIR); also,
-      !it becomes E with probability lambda when it interacts with one of its I
-      !neighbors.
-      r = r1279()
-      if ((loc_states(i) == 'E').and.(r < nu)) then
-        states(i) = 'I'
-      else if ((loc_states(i) == 'I').and.(r < mu)) then
-        states(i) = 'R'
-      else if (loc_states(i) == 'S') then
-        p1 = 1.0d0 - product(1.0d0-alpha*merge(1.0d0, 0.0d0, loc_states(nbrs)=='E'))
-        p2 = 1.0d0 - product(1.0d0-lambda*merge(1.0d0, 0.0d0, loc_states(nbrs)=='I'))
-        if (r < p1+p2) states(i) = 'E'
-      end if
-
-      deallocate(nbrs)
-    end do
-  end subroutine mc_seir_kernel
-
-
-  !Subroutine that spreads an infection that follows the SIR rules on a network
-  !using a Monte Carlo simulation.
-  subroutine mc_sir(history, indices, origin, lambda, mu, t0, states)
-    implicit none
-
-    !Input arguments.
-    double precision, intent(in) :: lambda, mu
-    integer, intent(in) :: origin, t0
-    type(int_list_list), dimension(:), intent(in) :: indices
-    type(node), dimension(:), intent(in) :: history
-
-    !Output arguments.
-    character(len=1), dimension(:), intent(out) :: states
-
-    !Local variables.
-    character(len=1), dimension(size(history)) :: loc_states
-    double precision :: p, r
-    integer, dimension(:), allocatable :: nbrs
-    integer :: i, isize, N, t
-
-    !Number of nodes.
-    N = size(history)
-
-    !We initialize the array of states.
-    states = 'S'
-    states(origin) = 'I'
-    loc_states = states
-
-    !Monte Carlo simulation for the SIR model.
-    do t = 1, t0
       do i = 1, N
-        !We compute the neighbors of node i at time t.
-        isize = size(indices(i)%time(t)%array)
-        allocate(nbrs(isize))
-        nbrs = history(i)%neighbors(indices(i)%time(t)%array)
-
-        !We apply the SIR rules at each t: an I node becomes R with probability
-        !mu regardless of its neighbors; a S node becomes I with probability
-        !lambda when it makes contact with one of its I neighbors.
-        r = r1279()
-        if ((loc_states(i) == 'I').and.(r < mu)) then
+        if (states(i) == 'I') then
           states(i) = 'R'
-        else if (loc_states(i) == 'S') then
-          p = 1.0d0 - product(1.0d0-lambda*merge(1.0d0, 0.0d0, loc_states(nbrs)=='I'))
-          if (r < p) states(i) = 'I'
+        else if (states(i) == 'E') then
+          states(i) = 'I'
         end if
-
-        deallocate(nbrs)
       end do
-      !We update loc_states at the end of each time step.
-      loc_states = states
-    end do
-  end subroutine mc_sir
+    end if
+  end subroutine mc_sim
 end module mc_simulations

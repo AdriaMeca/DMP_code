@@ -1,7 +1,7 @@
 !Module containing dynamic message-passing algorithms (DMP) for different
 !epidemiological models (SIR and SEIR) in time-varying networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 22/05/22.
+!Last modified date: 23/05/22.
 module dmp_algorithms
   use array_procedures, only : dbl_list, int_list_list, pop
   use network_generation, only : node
@@ -131,5 +131,16 @@ contains
     end do
     !We normalize the trajectories.
     tmp_dmp_probs = tmp_dmp_probs / N
+
+    !If we are considering the SIR model, in the end we have to perform the
+    !following exchanges: (PE, PI, PR) --> (0.0, PE, PI).
+    if (type == 'SIR') then
+      tmp_dmp_probs(:, 3:4) = tmp_dmp_probs(:, 2:3)
+      tmp_dmp_probs(:, 2) = 0.0d0
+
+      pr = pi
+      pi = pe
+      pe = 0.0d0
+    end if
   end subroutine dmp
 end module dmp_algorithms
