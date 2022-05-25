@@ -1,10 +1,9 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 21/05/22.
+!Last modified date: 25/05/22.
 module rewiring_algorithms
-  use array_procedures, only : add_item, find_int, int_list, int_list_list, &
-    my_pack
+  use array_procedures, only : add, find, int_list, int_llist, my_pack
   use network_generation, only : node
   use random_number_generator, only : r1279
 
@@ -22,15 +21,19 @@ contains
 
     !Input arguments.
     character(len=*), intent(in) :: type
+
     double precision, intent(in) :: q
+
     integer, intent(in) :: c, t0
 
     !Output arguments.
     type(node), dimension(:), intent(inout) :: history, network
-    type(int_list_list), dimension(:), intent(inout) :: indices
+
+    type(int_llist), dimension(:), intent(inout) :: indices
 
     !Local variables.
     integer :: altk, i, id_ki, isize, k, N, t
+
     type(int_list) :: locations
 
     !Number of nodes.
@@ -60,24 +63,24 @@ contains
         do altk = 1, isize
           k = network(i)%neighbors(altk)
 
-          id_ki = find_int(history(i)%neighbors, k)
+          id_ki = find(history(i)%neighbors, k)
           !If the connection (i, k) has not occurred until this time step,
           !we save it in history.
           if (id_ki == 0) then
-            call add_item(history(i)%neighbors, k)
-            call add_item(history(k)%opposites, size(history(i)%neighbors))
-            call add_item(history(k)%neighbors, i)
-            call add_item(history(i)%opposites, size(history(k)%neighbors))
+            call add(history(i)%neighbors, k)
+            call add(history(k)%opposites, size(history(i)%neighbors))
+            call add(history(k)%neighbors, i)
+            call add(history(i)%opposites, size(history(k)%neighbors))
 
-            call add_item(locations%array, size(history(i)%neighbors))
+            call add(locations%array, size(history(i)%neighbors))
           else
-            call add_item(locations%array, id_ki)
+            call add(locations%array, id_ki)
           end if
         end do
 
         !We save the active connections that node i has at this time step
         !inside indices.
-        call add_item(indices(i)%time, locations)
+        call add(indices(i)%time, locations)
         deallocate(locations%array)
       end do
     end do
@@ -91,6 +94,7 @@ contains
 
     !Input arguments.
     double precision, intent(in) :: q
+
     integer, intent(in) :: c, N
 
     !Output arguments.
@@ -124,10 +128,10 @@ contains
         call my_pack(network(m)%neighbors, network(m)%neighbors/=k)
 
         !We add the new connections.
-        call add_item(network(i)%neighbors, k)
-        call add_item(network(k)%neighbors, i)
-        call add_item(network(j)%neighbors, m)
-        call add_item(network(m)%neighbors, j)
+        call add(network(i)%neighbors, k)
+        call add(network(k)%neighbors, i)
+        call add(network(j)%neighbors, m)
+        call add(network(m)%neighbors, j)
       end if
     end do
   end subroutine std_rewiring
@@ -140,6 +144,7 @@ contains
 
     !Input arguments.
     double precision, intent(in) :: q
+
     integer, intent(in) :: c, N
 
     !Output arguments.
@@ -175,8 +180,8 @@ contains
         call my_pack(network(m)%neighbors, network(m)%neighbors/=j)
 
         !We add the new connection.
-        call add_item(network(i)%neighbors, k)
-        call add_item(network(k)%neighbors, i)
+        call add(network(i)%neighbors, k)
+        call add(network(k)%neighbors, i)
       end if
     end do
   end subroutine uni_rewiring

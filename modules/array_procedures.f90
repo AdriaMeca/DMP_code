@@ -1,6 +1,6 @@
 !Module whose procedures create, modify and study arrays.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 21/05/22.
+!Last modified date: 25/05/22.
 module array_procedures
   implicit none
 
@@ -17,28 +17,36 @@ module array_procedures
   end type int_list
 
   !List of lists of integers.
-  type, public :: int_list_list
+  type, public :: int_llist
     type(int_list), dimension(:), allocatable :: time
-  end type int_list_list
+  end type int_llist
 
   !Pair of integers.
   type, public :: int_pair
     integer :: x, y
   end type int_pair
 
-  interface add_item
+  !Interface that adds elements to lists.
+  interface add
     module procedure add_dbl, add_int, add_int_list, add_int_pair
-  end interface add_item
+  end interface add
 
+  !Interface that searches for elements in lists.
+  interface find
+    module procedure find_int
+  end interface find
+
+  !Interface that returns the indices that sort a given list in ascending order.
   interface idx_insertion_sort
     module procedure dbl_idx_insertion_sort, int_idx_insertion_sort
   end interface idx_insertion_sort
 
+  !Interface that filters different lists given a condition.
   interface my_pack
     module procedure my_pack_int, my_pack_int_pair
   end interface my_pack
 
-  public add_item, find_int, idx_insertion_sort, my_pack, pop, quicksort
+  public add, find, idx_insertion_sort, my_pack, pop, quicksort
 
 contains
   !Function that searches the index of an integer in a list of integers.
@@ -78,6 +86,7 @@ contains
 
     !Local variables.
     double precision, dimension(size(list)) :: copy_list
+
     integer :: i, j
 
     copy_list = list
@@ -129,6 +138,7 @@ contains
 
     !Input arguments.
     double precision, dimension(:), intent(in) :: list
+
     integer, intent(in) :: index
 
     !Output arguments.
@@ -158,6 +168,7 @@ contains
 
     !Local variables.
     double precision, dimension(:), allocatable :: copy_list
+
     integer :: isize
 
     if (allocated(list)) then
@@ -231,8 +242,9 @@ contains
     type(int_list), intent(in) :: element
 
     !Local variables.
-    type(int_list), dimension(:), allocatable :: copy_list
     integer :: isize
+
+    type(int_list), dimension(:), allocatable :: copy_list
 
     if (allocated(list)) then
       !We create a temporary list with one more element than the original.
@@ -268,8 +280,9 @@ contains
     type(int_pair), intent(in) :: element
 
     !Local variables.
-    type(int_pair), dimension(:), allocatable :: copy_list
     integer :: isize
+
+    type(int_pair), dimension(:), allocatable :: copy_list
 
     if (allocated(list)) then
       !We create a temporary list with one more element than the original.
@@ -303,6 +316,7 @@ contains
 
     !Input/output arguments.
     integer, dimension(:), allocatable, intent(inout) :: list
+
     logical, dimension(:), intent(in) :: condition
 
     !Local variables.
@@ -346,10 +360,12 @@ contains
 
     !Input/output arguments.
     logical, dimension(:), intent(in) :: condition
+
     type(int_pair), dimension(:), allocatable, intent(inout) :: list
 
     !Local variables.
     integer :: i, j, new_size, old_size
+
     type(int_pair), dimension(:), allocatable :: copy_list
 
     if (.not.allocated(list)) then
@@ -389,12 +405,14 @@ contains
 
     !Input/output arguments.
     double precision, dimension(:), intent(inout) :: energies
+
     integer, dimension(:), intent(inout) :: node_ids
 
     !Local variables.
     double precision, dimension(:), allocatable :: e_eq, e_gt, e_lt
     double precision, parameter :: eps=1.0d-12
     double precision :: e, pivot
+
     integer, dimension(:), allocatable :: n_eq, n_gt, n_lt
     integer :: i, isize, n
 
@@ -412,14 +430,14 @@ contains
         e = energies(i)
         n = node_ids(i)
         if (abs(e-pivot) < eps) then
-          call add_item(e_eq, e)
-          call add_item(n_eq, n)
+          call add(e_eq, e)
+          call add(n_eq, n)
         else if (e < pivot) then
-          call add_item(e_lt, e)
-          call add_item(n_lt, n)
+          call add(e_lt, e)
+          call add(n_lt, n)
         else if (e > pivot) then
-          call add_item(e_gt, e)
-          call add_item(n_gt, n)
+          call add(e_gt, e)
+          call add(n_gt, n)
         end if
       end do
 

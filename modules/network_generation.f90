@@ -1,8 +1,8 @@
 !Module whose procedures create different networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 21/05/22.
+!Last modified date: 25/05/22.
 module network_generation
-  use array_procedures, only : add_item, int_list, int_pair, my_pack
+  use array_procedures, only : add, int_list, int_pair, my_pack
   use random_number_generator, only : r1279
 
   implicit none
@@ -24,6 +24,7 @@ contains
 
     !Input arguments.
     double precision, intent(in) :: l0
+
     integer, intent(in) :: c, N
 
     !Output arguments.
@@ -32,6 +33,7 @@ contains
     !Local variables.
     double precision, dimension(N, 2) :: positions
     double precision :: dij, L, pij
+
     integer :: i, j
 
     L = sqrt(dble(N))
@@ -51,8 +53,8 @@ contains
 
         !We decide if i and j are connected or not.
         if (r1279() < pij*exp(-dij/l0)) then
-          call add_item(PN(i)%neighbors, j)
-          call add_item(PN(j)%neighbors, i)
+          call add(PN(i)%neighbors, j)
+          call add(PN(j)%neighbors, i)
         end if
       end do
     end do
@@ -72,9 +74,12 @@ contains
 
     !Local variables.
     double precision :: x
+
     integer, dimension(:), allocatable :: array_u, array_v
     integer :: i, idx_i, idx_j, idx_k, j, u, v
+
     type(int_list), dimension(N) :: G
+
     type(int_pair), dimension(:), allocatable :: array_w
     type(int_pair) :: link
 
@@ -124,8 +129,8 @@ contains
         if (size(G(v)%array) == 0) call my_pack(array_v, array_v/=v)
 
         !We connect u and v.
-        call add_item(RRG(u)%neighbors, v)
-        call add_item(RRG(v)%neighbors, u)
+        call add(RRG(u)%neighbors, v)
+        call add(RRG(v)%neighbors, u)
       end do
 
       !We free array_u from memory because it is no longer needed.
@@ -137,7 +142,7 @@ contains
           u = array_v(idx_i)
           v = array_v(idx_j)
 
-          if (all(RRG(u)%neighbors /= v)) call add_item(array_w, int_pair(u, v))
+          if (all(RRG(u)%neighbors /= v)) call add(array_w, int_pair(u, v))
         end do
       end do
 
@@ -178,8 +183,8 @@ contains
         end if
 
         !We connect u and v.
-        call add_item(RRG(u)%neighbors, v)
-        call add_item(RRG(v)%neighbors, u)
+        call add(RRG(u)%neighbors, v)
+        call add(RRG(v)%neighbors, u)
       end do
 
       !If there are no groups available, we are done.

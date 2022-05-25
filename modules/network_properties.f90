@@ -1,6 +1,6 @@
 !Module whose procedures study the properties of networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 24/05/22.
+!Last modified date: 25/05/22.
 module network_properties
   use network_generation, only : node
 
@@ -66,6 +66,7 @@ contains
 
     !Input arguments.
     double precision, dimension(:, :), intent(in) :: positions
+
     type(node), dimension(:), intent(in) :: network
 
     !Local variables.
