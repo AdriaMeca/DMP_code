@@ -2,9 +2,9 @@
 !dynamic networks using Monte Carlo algorithms that impose different
 !epidemiological models (SIR and SEIR).
 !Author: Adrià Meca Montserrat.
-!Last modified date: 23/05/22.
+!Last modified date: 25/05/22.
 module mc_simulations
-  use array_procedures, only : int_list_list
+  use array_procedures, only : int_llist
   use network_generation, only : node
   use random_number_generator, only : r1279
 
@@ -23,25 +23,45 @@ contains
 
     !Input arguments.
     character(len=*), intent(in) :: type
+
     double precision, intent(in) :: alpha, lambda, mu, nu
+
     integer, dimension(:), intent(in) :: origins
     integer, intent(in) :: realizations, t0
-    type(int_list_list), dimension(:), intent(in) :: indices
+
+    type(int_llist), dimension(:), intent(in) :: indices
+
     type(node), dimension(:), intent(in) :: history
 
     !Output arguments.
     character(len=1), dimension(:), intent(out) :: states
+
     double precision, dimension(:, :), intent(out) :: tmp_mc_probs
 
     !Local variables.
     character(len=1), dimension(size(history)) :: auxsts
+
     double precision, dimension(t0, 4) :: mc_probs
-    double precision :: p1, p2, r
+    double precision :: altalpha, altlambda, altmu, altnu, p1, p2, r
+
     integer, dimension(:), allocatable :: nbrs
     integer :: alti, i, isize, N, t
 
     !Number of nodes.
     N = size(history)
+
+    !We choose the local epidemiological parameters based on the model in use.
+    if (type == 'SIR') then
+      altnu = mu
+      altmu = 0.0d0
+      altalpha = lambda
+      altlambda = 0.0d0
+    else
+      altmu = mu
+      altnu = nu
+      altalpha = alpha
+      altlambda = lambda
+    end if
 
     tmp_mc_probs = 0.0d0
     do alti = 1, realizations
@@ -67,13 +87,13 @@ contains
           !it becomes E with probability lambda when it interacts with one of its I
           !neighbors.
           r = r1279()
-          if ((auxsts(i) == 'E').and.(r < nu)) then
+          if ((auxsts(i) == 'E').and.(r < altnu)) then
             states(i) = 'I'
-          else if ((auxsts(i) == 'I').and.(r < mu)) then
+          else if ((auxsts(i) == 'I').and.(r < altmu)) then
             states(i) = 'R'
           else if (auxsts(i) == 'S') then
-            p1 = 1.0d0 - product(1.0d0-alpha*merge(1, 0, auxsts(nbrs)=='E'))
-            p2 = 1.0d0 - product(1.0d0-lambda*merge(1, 0, auxsts(nbrs)=='I'))
+            p1 = 1.0d0 - product(1.0d0-altalpha*merge(1, 0, auxsts(nbrs)=='E'))
+            p2 = 1.0d0 - product(1.0d0-altlambda*merge(1, 0, auxsts(nbrs)=='I'))
             if (r < p1+p2) states(i) = 'E'
           end if
 

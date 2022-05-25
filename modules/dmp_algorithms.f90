@@ -3,7 +3,7 @@
 !Author: Adrià Meca Montserrat.
 !Last modified date: 25/05/22.
 module dmp_algorithms
-  use array_procedures, only : dbl_list, int_list_list, my_pack, pop
+  use array_procedures, only : dbl_list, int_llist, my_pack, pop
   use network_generation, only : node
 
   implicit none
@@ -21,11 +21,16 @@ contains
     !Input arguments.
     character(len=1), dimension(:), intent(in) :: states
     character(len=*), intent(in) :: type
+
     double precision, intent(in) :: alpha, lambda, mu, nu
+
     integer, dimension(:), intent(in) :: origins
     integer, intent(in) :: t0
+
     logical, intent(in) :: restricted
-    type(int_list_list), dimension(:), intent(in) :: indices
+
+    type(int_llist), dimension(:), intent(in) :: indices
+
     type(node), dimension(:), intent(in) :: history
 
     !Output arguments.
@@ -34,16 +39,30 @@ contains
 
     !Local variables.
     double precision, dimension(size(history)) :: ps0
-    double precision :: altnu, theta_ki
+    double precision :: altalpha, altlambda, altmu, altnu, altxi, theta_ki
+
     integer, dimension(:), allocatable :: non_susceptible
     integer :: alti, altk, gsize, hsize, i, ik, isize, k, ki, N, t
+
     type(dbl_list), dimension(size(history)) :: ops, nps, phi, psi, theta
 
     !Number of nodes.
     N = size(history)
 
-    !Number that alternates the SEIR and SIR models.
-    altnu = merge(nu, 0.0d0, type=='SEIR')
+    !We choose the local epidemiological parameters based on the model in use.
+    if (type == 'SIR') then
+      altnu = mu
+      altmu = 0.0d0
+      altxi = 0.0d0
+      altalpha = lambda
+      altlambda = 0.0d0
+    else
+      altmu = mu
+      altnu = nu
+      altxi = nu
+      altalpha = alpha
+      altlambda = lambda
+    end if
 
     !Initial conditions for the marginal probabilities.
     ps0 = 1.0d0
@@ -92,8 +111,8 @@ contains
           !We update the thetas that enter node i at time t.
           do altk = 1, isize
             ki = indices(i)%time(t)%array(altk)
-            theta(i)%array(ki) = theta(i)%array(ki) - alpha*psi(i)%array(ki) &
-              - lambda*phi(i)%array(ki)
+            theta(i)%array(ki) = theta(i)%array(ki) - altalpha*psi(i)%array(ki) &
+              - altlambda*phi(i)%array(ki)
           end do
 
           !We calculate the probability that node i is S at time t.
@@ -120,18 +139,18 @@ contains
         isize = size(indices(i)%time(t)%array)
         do altk = 1, isize
           ki = indices(i)%time(t)%array(altk)
-          psi(i)%array(ki) = (1.0d0-alpha) * psi(i)%array(ki)
-          phi(i)%array(ki) = (1.0d0-lambda) * phi(i)%array(ki)
+          psi(i)%array(ki) = (1.0d0-altalpha) * psi(i)%array(ki)
+          phi(i)%array(ki) = (1.0d0-altlambda) * phi(i)%array(ki)
         end do
-        phi(i)%array = (1.0d0-mu)*phi(i)%array + altnu*psi(i)%array
-        psi(i)%array = (1.0d0-nu)*psi(i)%array + ops(i)%array - nps(i)%array
+        phi(i)%array = (1.0d0-altmu)*phi(i)%array + altxi*psi(i)%array
+        psi(i)%array = (1.0d0-altnu)*psi(i)%array + ops(i)%array - nps(i)%array
 
         !We update the opses that enter node i at time t.
         ops(i)%array = nps(i)%array
 
         !We compute the other marginal probabilities at time t.
-        pr(i) = pr(i) + mu*pi(i)
-        pi(i) = (1.0d0-mu)*pi(i) + nu*pe(i)
+        pr(i) = pr(i) + altmu*pi(i)
+        pi(i) = (1.0d0-altmu)*pi(i) + altnu*pe(i)
         pe(i) = 1.0d0 - ps(i) - pi(i) - pr(i)
       end do
 
