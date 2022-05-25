@@ -1,9 +1,9 @@
 !Module containing dynamic message-passing algorithms (DMP) for different
 !epidemiological models (SIR and SEIR) in time-varying networks.
 !Author: Adrià Meca Montserrat.
-!Last modified date: 23/05/22.
+!Last modified date: 25/05/22.
 module dmp_algorithms
-  use array_procedures, only : dbl_list, int_list_list, pop
+  use array_procedures, only : dbl_list, int_list_list, my_pack, pop
   use network_generation, only : node
 
   implicit none
@@ -14,15 +14,17 @@ module dmp_algorithms
 
 contains
   !DMP algorithm for the SIR and SEIR models.
-  subroutine dmp(type, history, indices, origins, alpha, lambda, mu, nu, t0, &
-    ps, pe, pi, pr, tmp_dmp_probs)
+  subroutine dmp(type, restricted, history, indices, states, origins, &
+    alpha, lambda, mu, nu, t0, ps, pe, pi, pr, tmp_dmp_probs)
     implicit none
 
     !Input arguments.
+    character(len=1), dimension(:), intent(in) :: states
     character(len=*), intent(in) :: type
     double precision, intent(in) :: alpha, lambda, mu, nu
     integer, dimension(:), intent(in) :: origins
     integer, intent(in) :: t0
+    logical, intent(in) :: restricted
     type(int_list_list), dimension(:), intent(in) :: indices
     type(node), dimension(:), intent(in) :: history
 
@@ -33,7 +35,8 @@ contains
     !Local variables.
     double precision, dimension(size(history)) :: ps0
     double precision :: altnu, theta_ki
-    integer :: altk, hsize, i, ik, isize, k, ki, N, t
+    integer, dimension(:), allocatable :: non_susceptible
+    integer :: alti, altk, gsize, hsize, i, ik, isize, k, ki, N, t
     type(dbl_list), dimension(size(history)) :: ops, nps, phi, psi, theta
 
     !Number of nodes.
@@ -69,11 +72,20 @@ contains
       end do
     end do
 
+    !In the restricted version of the DMP algorithm we only iterate over the
+    !nodes whose state is different from S.
+    allocate(non_susceptible(N))
+    non_susceptible = [(i, i=1,N)]
+    if (restricted) call my_pack(non_susceptible, states/='S')
+    gsize = size(non_susceptible)
+
     tmp_dmp_probs = 0.0d0
     do t = 1, t0
       !We apply the DMP iteration to compute the marginal probabilities that
       !each node is in a given state at time t.
-      do i = 1, N
+      do alti = 1, gsize
+        i = non_susceptible(alti)
+
         hsize = size(history(i)%neighbors)
         isize = size(indices(i)%time(t)%array)
         if (isize > 0) then
@@ -101,7 +113,9 @@ contains
         end if
       end do
 
-      do i = 1, N
+      do alti = 1, gsize
+        i = non_susceptible(alti)
+
         !We update the phis and psis that enter node i at time t.
         isize = size(indices(i)%time(t)%array)
         do altk = 1, isize
