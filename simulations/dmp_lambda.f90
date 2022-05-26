@@ -35,7 +35,7 @@ program dmp_lambda
 
 
   !Parameters.
-  open(unit=10, file='params_lambda.txt')
+  open(unit=10, file='prm_lambda.txt')
     read(10, *) restr
     read(10, *) model
     read(10, *) seeds, points, instances
