@@ -1,6 +1,6 @@
 !Module whose procedures generate random numbers.
-!Authors: Matteo Palassini and Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Authors: Matteo Palassini and Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module random_number_generator
   implicit none
 
@@ -40,6 +40,7 @@ contains
       ntab=32, ndiv=67108862
     integer, save :: idum2=123456789, iv(ntab)=ntab*0, iy=0
     integer :: idx1, idx2, j, k
+
 
     !Initialize.
     if (idum <= 0) then
@@ -89,6 +90,7 @@ contains
   end function ran2
 
 
+
   !Function that generates random doubles between 0.0 and 1.0.
   function r1279()
     implicit none
@@ -99,6 +101,7 @@ contains
     !Local variables.
     integer :: ir1279
 
+
     !We generate a random integer between 0 and maxint.
     ioffset = iand(ioffset+1, 2047)
     irand(ioffset) = irand(index1(ioffset)) * irand(index2(ioffset))
@@ -106,6 +109,7 @@ contains
 
     r1279 = ir1279 * inv_maxint
   end function r1279
+
 
 
   !Subroutine that initializes the Lagged Fibonacci random number generator.
@@ -118,6 +122,7 @@ contains
     !Local variables.
     integer, parameter :: nbitm1=31
     integer :: ibit, ispoke, one_bit, localseed
+
 
     !Initialize ioffset. This will be increased by (1 mod 2048) for
     !each random number which is called.

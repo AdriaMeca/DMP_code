@@ -1,7 +1,7 @@
 !Module containing dynamic message-passing algorithms (DMP) for different
 !epidemiological models (SIR and SEIR) in time-varying networks.
-!Author: Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Author: Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module dmp_algorithms
   use array_procedures, only : dbl_list, int_llist, my_pack, pop
   use network_generation, only : node
@@ -45,6 +45,7 @@ contains
     integer :: alti, altk, gsize, hsize, i, ik, isize, k, ki, N, t
 
     type(dbl_list), dimension(size(history)) :: ops, nps, phi, psi, theta
+
 
     !Number of nodes.
     N = size(history)

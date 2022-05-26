@@ -1,7 +1,7 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
-!Author: Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Author: Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module rewiring_algorithms
   use array_procedures, only : add, find, int_list, int_llist, my_pack
   use network_generation, only : node
@@ -35,6 +35,7 @@ contains
     integer :: altk, i, id_ki, isize, k, N, t
 
     type(int_list) :: locations
+
 
     !Number of nodes.
     N = size(network)
@@ -87,6 +88,7 @@ contains
   end subroutine rewiring
 
 
+
   !Subroutine that modifies the connections of a network using a standard rewiring
   !algorithm.
   subroutine std_rewiring(network, N, c, q)
@@ -102,6 +104,7 @@ contains
 
     !Local variables.
     integer :: i, idx, j, k, m
+
 
     do idx = 1, N*c/4
       if (r1279() < q) then
@@ -137,6 +140,7 @@ contains
   end subroutine std_rewiring
 
 
+
   !Subroutine that modifies the connections of a network using a uniform rewiring
   !algorithm.
   subroutine uni_rewiring(network, N, c, q)
@@ -152,6 +156,7 @@ contains
 
     !Local variables.
     integer :: i, idx, j, jsize, k, m
+
 
     do idx = 1, N*c/4
       if (r1279() < q) then

@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
-!Author: Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Author: Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module network_generation
   use array_procedures, only : add, int_list, int_pair, my_pack
   use random_number_generator, only : r1279
@@ -36,6 +36,7 @@ contains
 
     integer :: i, j
 
+
     L = sqrt(dble(N))
     pij = c / dble(N)
 
@@ -61,6 +62,7 @@ contains
   end function PN
 
 
+
   !Function that creates a random regular graph (RRG), i.e., a network
   !whose nodes have the same number of neighbors c (degree).
   function RRG(N, c)
@@ -82,6 +84,7 @@ contains
 
     type(int_pair), dimension(:), allocatable :: array_w
     type(int_pair) :: link
+
 
     do while (.true.)
       allocate(array_u(N*c), array_v(N), array_w(0))

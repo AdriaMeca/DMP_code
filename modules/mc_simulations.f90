@@ -1,8 +1,8 @@
 !Module that contains procedures that simulate the spread of epidemics on
 !dynamic networks using Monte Carlo algorithms that impose different
 !epidemiological models (SIR and SEIR).
-!Author: Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Author: Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module mc_simulations
   use array_procedures, only : int_llist
   use network_generation, only : node
@@ -46,6 +46,7 @@ contains
 
     integer, dimension(:), allocatable :: nbrs
     integer :: alti, i, isize, N, t
+
 
     !Number of nodes.
     N = size(history)

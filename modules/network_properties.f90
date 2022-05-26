@@ -1,6 +1,6 @@
 !Module whose procedures study the properties of networks.
-!Author: Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Author: Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module network_properties
   use network_generation, only : node
 
@@ -21,8 +21,10 @@ contains
     !Output arguments.
     double precision :: average_degree
 
+
     average_degree = connection_points(network) / dble(size(network))
   end function average_degree
+
 
 
   !Function that calculates the total number of connection points of a network.
@@ -39,11 +41,13 @@ contains
     !Local variables.
     integer :: i
 
+
     connection_points = 0
     do i = 1, size(network)
       connection_points = connection_points + size(network(i)%neighbors)
     end do
   end function connection_points
+
 
 
   !Function that calculates the number of edges of a network.
@@ -56,8 +60,10 @@ contains
     !Output arguments.
     integer :: number_of_edges
 
+
     number_of_edges = connection_points(network) / 2
   end function number_of_edges
+
 
 
   !Subroutine that writes the information needed for Gnuplot to draw a network.
@@ -71,6 +77,7 @@ contains
 
     !Local variables.
     integer :: i, isize, k, ki, N
+
 
     !Number of nodes.
     N = size(network)

@@ -1,6 +1,6 @@
 !Module whose procedures create, modify and study arrays.
-!Author: Adrià Meca Montserrat.
-!Last modified date: 25/05/22.
+!Author: Adria Meca Montserrat.
+!Last modified date: 26/05/22.
 module array_procedures
   implicit none
 
@@ -63,6 +63,7 @@ contains
     !Local variables.
     integer :: i
 
+
     find_int = 0
     do i = 1, size(list)
       if (list(i) == element) then
@@ -71,6 +72,7 @@ contains
       end if
     end do
   end function find_int
+
 
 
   !Function that returns the permutation of the indices that orders its
@@ -89,6 +91,7 @@ contains
 
     integer :: i, j
 
+
     copy_list = list
     dbl_idx_insertion_sort = [(i, i=1,size(list))]
     do i = 2, size(list)
@@ -101,6 +104,7 @@ contains
       end do
     end do
   end function dbl_idx_insertion_sort
+
 
 
   !Function that returns the permutation of the indices that orders its
@@ -118,6 +122,7 @@ contains
     integer, dimension(size(list)) :: copy_list
     integer :: i, j
 
+
     copy_list = list
     int_idx_insertion_sort = [(i, i=1,size(list))]
     do i = 2, size(list)
@@ -130,6 +135,7 @@ contains
       end do
     end do
   end function int_idx_insertion_sort
+
 
 
   !Function that returns a list without the element placed at index.
@@ -147,6 +153,7 @@ contains
     !Local variables.
     integer :: n
 
+
     n = size(list)
     if ((1 <= index).and.(index <= n)) then
       allocate(pop(n-1))
@@ -156,6 +163,7 @@ contains
       pop = list
     end if
   end function pop
+
 
 
   !Subroutine that adds a double to an array of doubles.
@@ -170,6 +178,7 @@ contains
     double precision, dimension(:), allocatable :: copy_list
 
     integer :: isize
+
 
     if (allocated(list)) then
       !We create a temporary list with one more element than the original.
@@ -196,6 +205,7 @@ contains
   end subroutine add_dbl
 
 
+
   !Subroutine that adds an integer to an array of integers.
   subroutine add_int(list, element)
     implicit none
@@ -207,6 +217,7 @@ contains
     !Local variables.
     integer, dimension(:), allocatable :: copy_list
     integer :: isize
+
 
     if (allocated(list)) then
       !We create a temporary list with one more element than the original.
@@ -233,6 +244,7 @@ contains
   end subroutine add_int
 
 
+
   !Subroutine that adds a list of integers to a list of lists (of integers).
   subroutine add_int_list(list, element)
     implicit none
@@ -245,6 +257,7 @@ contains
     integer :: isize
 
     type(int_list), dimension(:), allocatable :: copy_list
+
 
     if (allocated(list)) then
       !We create a temporary list with one more element than the original.
@@ -271,6 +284,7 @@ contains
   end subroutine add_int_list
 
 
+
   !Subroutine that adds an int_pair to a list of pairs (of integers).
   subroutine add_int_pair(list, element)
     implicit none
@@ -283,6 +297,7 @@ contains
     integer :: isize
 
     type(int_pair), dimension(:), allocatable :: copy_list
+
 
     if (allocated(list)) then
       !We create a temporary list with one more element than the original.
@@ -309,6 +324,7 @@ contains
   end subroutine add_int_pair
 
 
+
   !Custom version of the PACK function provided by GFortran that applies to
   !lists of integers.
   subroutine my_pack_int(list, condition)
@@ -322,6 +338,7 @@ contains
     !Local variables.
     integer, dimension(:), allocatable :: copy_list
     integer :: i, j, new_size, old_size
+
 
     if (.not.allocated(list)) then
       print*, 'An attempt was made to filter an unallocated list.'
@@ -353,6 +370,7 @@ contains
   end subroutine my_pack_int
 
 
+
   !Custom version of the PACK function provided by GFortran that applies to
   !lists of integer pairs.
   subroutine my_pack_int_pair(list, condition)
@@ -367,6 +385,7 @@ contains
     integer :: i, j, new_size, old_size
 
     type(int_pair), dimension(:), allocatable :: copy_list
+
 
     if (.not.allocated(list)) then
       print*, 'An attempt was made to filter an unallocated list.'
@@ -398,6 +417,7 @@ contains
   end subroutine my_pack_int_pair
 
 
+
   !Recursive subroutine that sorts two lists in ascending order from the values
   !of the first.
   recursive subroutine quicksort(energies, node_ids)
@@ -415,6 +435,7 @@ contains
 
     integer, dimension(:), allocatable :: n_eq, n_gt, n_lt
     integer :: i, isize, n
+
 
     !If the size of the list of energies is less than or equal to 1 we do not
     !have to do anything to it because it is already sorted.
