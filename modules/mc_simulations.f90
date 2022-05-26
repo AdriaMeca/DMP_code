@@ -17,12 +17,12 @@ module mc_simulations
 contains
   !Subroutine that spreads an infection that follows the S(E)IR rules on a network
   !using a Monte Carlo simulation.
-  subroutine mc_sim(type, history, indices, origins, alpha, lambda, mu, nu, t0, &
+  subroutine mc_sim(model, history, indices, origins, alpha, lambda, mu, nu, t0, &
     states, realizations, tmp_mc_probs)
     implicit none
 
     !Input arguments.
-    character(len=*), intent(in) :: type
+    character(len=*), intent(in) :: model
 
     double precision, intent(in) :: alpha, lambda, mu, nu
 
@@ -52,7 +52,7 @@ contains
     N = size(history)
 
     !We choose the local epidemiological parameters based on the model in use.
-    if (type == 'SIR') then
+    if (trim(model) == 'SIR') then
       altnu = mu
       altmu = 0.0d0
       altalpha = lambda
@@ -129,7 +129,7 @@ contains
     !If we are considering the SIR model, in the end we have to perform the
     !following exchanges: (PE, PI, PR) --> (0.0, PE, PI) and ('E', 'I') -->
     !('I', 'R').
-    if (type == 'SIR') then
+    if (trim(model) == 'SIR') then
       tmp_mc_probs(:, 3:4) = tmp_mc_probs(:, 2:3)
       tmp_mc_probs(:, 2) = 0.0d0
 

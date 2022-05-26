@@ -15,7 +15,7 @@ program dmp_lambda
 
   !Variables.
   character(len=1), dimension(:), allocatable :: states
-  character(len=:), allocatable :: model
+  character(len=9) :: model
 
   double precision, dimension(:, :), allocatable :: tmp_dmp_probs, tmp_mc_probs
   double precision, dimension(:), allocatable :: energies, ps, pe, pi, pr
@@ -24,7 +24,7 @@ program dmp_lambda
     err_prob, err_rank, joint, l0, lambda, mu, nu, Q, rank
 
   integer, dimension(:), allocatable :: non_susceptible, origins, ranks
-  integer :: c, gsize, i, idx, ins, instances, length, N, node_i, point, points, &
+  integer :: c, gsize, i, idx, ins, instances, N, node_i, point, points, &
     seeds, t0, total
 
   logical :: restr
@@ -35,9 +35,8 @@ program dmp_lambda
 
 
   !Parameters.
-  open(unit=10, file='params.txt')
+  open(unit=10, file='params_lambda.txt')
     read(10, *) restr
-    read(10, *) length; allocate(character(len=length) :: model)
     read(10, *) model
     read(10, *) seeds, points, instances
     read(10, *) c, l0, N

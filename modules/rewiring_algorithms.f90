@@ -16,11 +16,11 @@ module rewiring_algorithms
 contains
   !Subroutine that records the changes that a network undergoes over time.
   !It also keeps track of the connections active at a certain time step.
-  subroutine rewiring(type, network, history, indices, c, t0, Q)
+  subroutine rewiring(model, network, history, indices, c, t0, Q)
     implicit none
 
     !Input arguments.
-    character(len=*), intent(in) :: type
+    character(len=*), intent(in) :: model
 
     double precision, intent(in) :: Q
 
@@ -49,7 +49,7 @@ contains
       !If the rewiring probability Q is greater than 0.0, we modify the
       !network connections.
       if ((t > 1).and.(Q > 0.0d0)) then
-        select case (type)
+        select case (trim(model))
           case ('rrg')
             call std_rewiring(network, N, c, Q)
           case ('uni')

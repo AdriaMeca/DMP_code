@@ -14,13 +14,13 @@ module dmp_algorithms
 
 contains
   !DMP algorithm for the SIR and SEIR models.
-  subroutine dmp(type, restricted, history, indices, states, origins, &
+  subroutine dmp(model, restricted, history, indices, states, origins, &
     alpha, lambda, mu, nu, t0, ps, pe, pi, pr, tmp_dmp_probs)
     implicit none
 
     !Input arguments.
     character(len=1), dimension(:), intent(in) :: states
-    character(len=*), intent(in) :: type
+    character(len=*), intent(in) :: model
 
     double precision, intent(in) :: alpha, lambda, mu, nu
 
@@ -51,7 +51,7 @@ contains
     N = size(history)
 
     !We choose the local epidemiological parameters based on the model in use.
-    if (type == 'SIR') then
+    if (trim(model) == 'SIR') then
       altnu = mu
       altmu = 0.0d0
       altxi = 0.0d0
@@ -169,7 +169,7 @@ contains
 
     !If we are considering the SIR model, in the end we have to perform the
     !following exchanges: (PE, PI, PR) --> (0.0, PE, PI).
-    if (type == 'SIR') then
+    if (trim(model) == 'SIR') then
       tmp_dmp_probs(:, 3:4) = tmp_dmp_probs(:, 2:3)
       tmp_dmp_probs(:, 2) = 0.0d0
 
