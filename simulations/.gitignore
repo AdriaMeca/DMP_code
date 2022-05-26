@@ -1,6 +1,9 @@
 #Ignore everything in this directory.
 *
-#Except these files.
+#Except these particular files.
 !README.md
 !.gitignore
+#And the files that are included in these patterns.
 !*.mk
+!*.f90
+!*.txt

@@ -1,3 +1,6 @@
+#Author: Adria Meca Montserrat.
+#Last modified date: 26/05/22.
+
 #Function that filters the strings that contain the substring 'v' from a given
 #list of strings.
 my_filter = $(foreach v,$(2),$(if $(findstring $(1),$(v)),,$(v)))
