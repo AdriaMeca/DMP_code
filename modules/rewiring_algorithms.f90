@@ -16,13 +16,13 @@ module rewiring_algorithms
 contains
   !Subroutine that records the changes that a network undergoes over time.
   !It also keeps track of the connections active at a certain time step.
-  subroutine rewiring(type, network, history, indices, c, t0, q)
+  subroutine rewiring(type, network, history, indices, c, t0, Q)
     implicit none
 
     !Input arguments.
     character(len=*), intent(in) :: type
 
-    double precision, intent(in) :: q
+    double precision, intent(in) :: Q
 
     integer, intent(in) :: c, t0
 
@@ -46,14 +46,14 @@ contains
     end do
 
     do t = 1, t0
-      !If the rewiring probability q is greater than 0.0, we modify the
+      !If the rewiring probability Q is greater than 0.0, we modify the
       !network connections.
-      if ((t > 1).and.(q > 0.0d0)) then
+      if ((t > 1).and.(Q > 0.0d0)) then
         select case (type)
           case ('rrg')
-            call std_rewiring(network, N, c, q)
+            call std_rewiring(network, N, c, Q)
           case ('uni')
-            call uni_rewiring(network, N, c, q)
+            call uni_rewiring(network, N, c, Q)
         end select
       end if
 
@@ -91,11 +91,11 @@ contains
 
   !Subroutine that modifies the connections of a network using a standard rewiring
   !algorithm.
-  subroutine std_rewiring(network, N, c, q)
+  subroutine std_rewiring(network, N, c, Q)
     implicit none
 
     !Input arguments.
-    double precision, intent(in) :: q
+    double precision, intent(in) :: Q
 
     integer, intent(in) :: c, N
 
@@ -107,7 +107,7 @@ contains
 
 
     do idx = 1, N*c/4
-      if (r1279() < q) then
+      if (r1279() < Q) then
         do while (.true.)
           !We choose two random nodes from the network.
           i = 1 + floor(N*r1279())
@@ -143,11 +143,11 @@ contains
 
   !Subroutine that modifies the connections of a network using a uniform rewiring
   !algorithm.
-  subroutine uni_rewiring(network, N, c, q)
+  subroutine uni_rewiring(network, N, c, Q)
     implicit none
 
     !Input arguments.
-    double precision, intent(in) :: q
+    double precision, intent(in) :: Q
 
     integer, intent(in) :: c, N
 
@@ -159,7 +159,7 @@ contains
 
 
     do idx = 1, N*c/4
-      if (r1279() < q) then
+      if (r1279() < Q) then
         do while (.true.)
           !We choose two random nodes from the network.
           i = 1 + floor(N*r1279())

@@ -15,7 +15,7 @@ program dmp_lambda
 
   !Variables.
   character(len=1), dimension(:), allocatable :: states
-  character(len=:), allocatable :: filename, model
+  character(len=:), allocatable :: model
 
   double precision, dimension(:, :), allocatable :: tmp_dmp_probs, tmp_mc_probs
   double precision, dimension(:), allocatable :: energies, ps, pe, pi, pr
@@ -35,8 +35,7 @@ program dmp_lambda
 
 
   !Parameters.
-  filename = 'params_lambda.txt'
-  open(unit=10, file=filename)
+  open(unit=10, file='params.txt')
     read(10, *) restr
     read(10, *) length; allocate(character(len=length) :: model)
     read(10, *) model
