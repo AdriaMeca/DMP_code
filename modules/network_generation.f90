@@ -19,14 +19,13 @@ contains
   !Function that creates a Proximity Network (PN), i.e., a network in which
   !links are established based on the distance between nodes. A parameter l
   !controls the magnitude of the distances: larger values of l favor longer
-  !connections. Here, l is implicitly present in the table of exponentials,
-  !eij(idx) = exp(-dij(idx)/l), which is used to compute the probability of
-  !connecting nodes i and j separated by a distance dij(idx).
-  function PN(N, c, eij)
+  !connections.
+  function PN(N, c, rij, l)
     implicit none
 
     !Input arguments.
-    double precision, dimension(:), intent(in) :: eij
+    double precision, dimension(:, :), intent(in) :: rij
+    double precision, intent(in) :: l
 
     integer, intent(in) :: c, N
 
@@ -34,7 +33,8 @@ contains
     type(node), dimension(N) :: PN
 
     !Local variables.
-    double precision :: A, pij
+    double precision, dimension(N*(N-1)/2) :: wij
+    double precision :: A, dij, eij, pij
 
     integer :: i, idx, j
 
@@ -44,12 +44,21 @@ contains
       allocate(PN(i)%neighbors(0))
     end do
 
-    !We calculate the normalization constant A.
+    !We calculate the table of exponentials and the normalization constant A.
     idx = 0
     A = 0.0d0
     do i = 1, N
       do j = i+1, N
-        A = A + eij(idx+j-1)
+        !Distance between nodes i and j.
+        dij = sqrt(sum((rij(i, :)-rij(j, :))**2))
+        !Exponential factor associated with the pair (i, j).
+        eij = exp(-dij/l)
+
+        !We save the exponential factor in the table of exponentials for later.
+        wij(idx+j-1) = eij
+
+        !We increment the value of A.
+        A = A + eij
       end do
       idx = idx + N - i - 1
     end do
@@ -62,7 +71,7 @@ contains
     do i = 1, N
       do j = i+1, N
         !We decide if i and j are connected or not.
-        if (r1279() < pij*eij(idx+j-1)) then
+        if (r1279() < pij*wij(idx+j-1)) then
           call add(PN(i)%neighbors, j)
           call add(PN(j)%neighbors, i)
         end if
