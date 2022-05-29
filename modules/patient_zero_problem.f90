@@ -13,15 +13,15 @@ module patient_zero_problem
 
   private
 
-  public patient_zero
+  public pz_sim
 
 contains
   !Subroutine that simulates the problem of the patient zero: given a snapshot
   !of an epidemic, we rank the non-susceptible nodes by their energy, which is
   !calculated using the marginal DMP probabilities. Then, we extract the ranks
   !the algorithm gives to the original seeds and the size of the epidemic.
-  subroutine patient_zero(model, dmpr, history, indices, seeds, ranks, gsize, &
-    alpha, lambda, mu, nu, t0)
+  subroutine pz_sim(model, dmpr, history, indices, seeds, ranks, gsize, alpha, &
+    lambda, mu, nu, t0)
     implicit none
 
     !Input arguments.
@@ -131,5 +131,5 @@ contains
     call quicksort(energies, non_susceptible)
     !We compute the ranks of the true seeds.
     ranks = [(find(non_susceptible, origins(i))-1, i=1,seeds)]
-  end subroutine patient_zero
+  end subroutine pz_sim
 end module patient_zero_problem
