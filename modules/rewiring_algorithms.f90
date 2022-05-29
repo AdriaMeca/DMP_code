@@ -1,7 +1,7 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adria Meca Montserrat.
-!Last modified date: 26/05/22.
+!Last modified date: 29/05/22.
 module rewiring_algorithms
   use array_procedures, only : add, find, int_list, int_llist, my_pack
   use network_generation, only : node
@@ -42,6 +42,11 @@ contains
 
     !We initialize history.
     do i = 1, N
+      !We remove the information from a hypothetical previous iteration.
+      if (allocated(history(i)%neighbors)) deallocate(history(i)%neighbors)
+      if (allocated(history(i)%opposites)) deallocate(history(i)%opposites)
+      if (allocated(indices(i)%time)) deallocate(indices(i)%time)
+
       allocate(history(i)%neighbors(0), history(i)%opposites(0))
     end do
 
