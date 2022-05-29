@@ -1,7 +1,7 @@
 F
 4, 1.0d0, 1000
 RRG, SIR, lambda
-0.05d0, 0.95d0, 10, normal, 1000
+0.05d0, 0.95d0, 20, normal, 1000
 1, 0.15d0, 0.7d0, 0.5d0, 0.2d0, 10, 0.0d0
 
 Description:
