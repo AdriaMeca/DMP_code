@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
 !Author: Adria Meca Montserrat.
-!Last modified date: 26/05/22.
+!Last modified date: 29/05/22.
 module network_generation
   use array_procedures, only : add, int_list, int_pair, my_pack
   use random_number_generator, only : r1279
@@ -16,14 +16,17 @@ module network_generation
   public PN, RRG
 
 contains
-  !Function that creates a proximity network (PN), i.e., a network in which
-  !short connections are favored. The parameter l0 controls this behaviour:
-  !larger values of l0 produce longer links.
-  function PN(N, c, l0)
+  !Function that creates a Proximity Network (PN), i.e., a network in which
+  !links are established based on the distance between nodes. A parameter l
+  !controls the magnitude of the distances: larger values of l favor longer
+  !connections. Here, l is implicitly present in the table of exponentials,
+  !eij(idx) = exp(-dij(idx)/l), which is used to compute the probability of
+  !connecting nodes i and j separated by a distance dij(idx).
+  function PN(N, c, eij)
     implicit none
 
     !Input arguments.
-    double precision, intent(in) :: l0
+    double precision, dimension(:), intent(in) :: eij
 
     integer, intent(in) :: c, N
 
@@ -31,39 +34,46 @@ contains
     type(node), dimension(N) :: PN
 
     !Local variables.
-    double precision, dimension(N, 2) :: positions
-    double precision :: dij, L, pij
+    double precision :: A, pij
 
-    integer :: i, j
+    integer :: i, idx, j
 
 
-    L = sqrt(dble(N))
-    pij = c / dble(N)
-
-    !We initialize the list of neighbors and the positions of the nodes.
+    !We initialize the list of neighbors.
     do i = 1, N
       allocate(PN(i)%neighbors(0))
-      positions(i, :) = L * [r1279(), r1279()]
     end do
 
-    !We connect the nodes.
+    !We calculate the normalization constant A.
+    idx = 0
+    A = 0.0d0
     do i = 1, N
       do j = i+1, N
-        !Distance between nodes i and j.
-        dij = sqrt(sum((positions(i, :)-positions(j, :))**2))
+        A = A + eij(idx+j-1)
+      end do
+      idx = idx + N - i - 1
+    end do
 
+    !Constant part of the probability of connecting any pair of nodes.
+    pij = c * N / 2.0d0 / A
+
+    !We connect the nodes.
+    idx = 0
+    do i = 1, N
+      do j = i+1, N
         !We decide if i and j are connected or not.
-        if (r1279() < pij*exp(-dij/l0)) then
+        if (r1279() < pij*eij(idx+j-1)) then
           call add(PN(i)%neighbors, j)
           call add(PN(j)%neighbors, i)
         end if
       end do
+      idx = idx + N - i - 1
     end do
   end function PN
 
 
 
-  !Function that creates a random regular graph (RRG), i.e., a network
+  !Function that creates a Random Regular Graph (RRG), i.e., a network
   !whose nodes have the same number of neighbors c (degree).
   function RRG(N, c)
     implicit none
