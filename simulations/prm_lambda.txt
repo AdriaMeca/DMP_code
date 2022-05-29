@@ -1,5 +1,0 @@
-F                           !T: DMPr; F: DMP.
-SIR                         !Epidemiological model.
-1 20 1000                   !Control parameters: # seeds, points, instances.
-4 1.0d0 1000                !Network parameters: c, l0 and N.
-1.5d-2 0.5d0 0.2d0 10 0.0d0 !Epidemiological parameters: alpha, mu, nu, t0 and Q.

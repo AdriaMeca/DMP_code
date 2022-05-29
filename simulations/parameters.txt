@@ -1,0 +1,12 @@
+F
+4, 1.0d0, 1000
+RRG, SIR, lambda
+0.05d0, 0.95d0, 10, normal, 1000
+1, 0.15d0, 0.7d0, 0.5d0, 0.2d0, 10, 0.0d0
+
+Description:
+1.- T: DMPr; F: DMP.
+2.- Network parameters: c, l and N.
+3.- Type of graph, epidemiological model and variable parameter.
+4.- Start point, end point, # points, type of scale and # instances.
+5.- Epidemiological parameters: # seeds, alpha, lambda, mu, nu, t0 and Q.
