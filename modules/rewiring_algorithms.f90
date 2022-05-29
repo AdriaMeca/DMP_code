@@ -55,9 +55,9 @@ contains
       !network connections.
       if ((t > 1).and.(Q > 0.0d0)) then
         select case (trim(model))
-          case ('rrg')
+          case ('RRG')
             call std_rewiring(network, N, c, Q)
-          case ('uni')
+          case ('PN')
             call uni_rewiring(network, N, c, Q)
         end select
       end if
