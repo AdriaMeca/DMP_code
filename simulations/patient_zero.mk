@@ -1,5 +1,5 @@
 #Author: Adria Meca Montserrat.
-#Last modified date: 29/05/22.
+#Last modified date: 30/05/22.
 
 #Function that filters the strings that contain the substring 'v' from a given
 #list of strings.
