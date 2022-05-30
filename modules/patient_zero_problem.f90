@@ -1,7 +1,7 @@
 !Module whose procedures simulate the patient zero problem in which we try to
 !locate the node(s) that started an epidemic in a given network.
 !Author: Adria Meca Montserrat.
-!Last modified date: 29/05/22.
+!Last modified date: 30/05/22.
 module patient_zero_problem
   use array_procedures, only : find, int_llist, my_pack, quicksort
   use dmp_algorithms, only : dmp
@@ -50,7 +50,8 @@ contains
     double precision, parameter :: small=1.0d-300
     double precision :: joint
 
-    integer, dimension(:), allocatable :: non_susceptible, origins
+    integer, dimension(:), allocatable :: non_susceptible
+    integer, dimension(seeds) :: origins
     integer :: i, idx, N, node_i, total
 
 
