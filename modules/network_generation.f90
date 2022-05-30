@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
 !Author: Adria Meca Montserrat.
-!Last modified date: 29/05/22.
+!Last modified date: 30/05/22.
 module network_generation
   use array_procedures, only : add, int_list, int_pair, my_pack
   use random_number_generator, only : r1279
@@ -33,50 +33,40 @@ contains
     type(node), dimension(N) :: PN
 
     !Local variables.
-    double precision, dimension(N*(N-1)/2) :: wij
-    double precision :: A, dij, eij, pij
+    double precision :: A, dij, pij
 
-    integer :: i, idx, j
+    integer :: i, j
 
-
-    !We initialize the list of neighbors.
-    do i = 1, N
-      allocate(PN(i)%neighbors(0))
-    end do
 
     !We calculate the table of exponentials and the normalization constant A.
-    idx = 0
     A = 0.0d0
     do i = 1, N
+      !We initialize the list of neighbors.
+      allocate(PN(i)%neighbors(0))
       do j = i+1, N
         !Distance between nodes i and j.
         dij = sqrt(sum((rij(i, :)-rij(j, :))**2))
-        !Exponential factor associated with the pair (i, j).
-        eij = exp(-dij/l)
-
-        !We save the exponential factor in the table of exponentials for later.
-        wij(idx+j-1) = eij
 
         !We increment the value of A.
-        A = A + eij
+        A = A + exp(-dij/l)
       end do
-      idx = idx + N - i - 1
     end do
 
     !Constant part of the probability of connecting any pair of nodes.
     pij = c * N / 2.0d0 / A
 
     !We connect the nodes.
-    idx = 0
     do i = 1, N
       do j = i+1, N
+        !Distance between nodes i and j.
+        dij = sqrt(sum((rij(i, :)-rij(j, :))**2))
+
         !We decide if i and j are connected or not.
-        if (r1279() < pij*wij(idx+j-1)) then
+        if (r1279() < pij*exp(-dij/l)) then
           call add(PN(i)%neighbors, j)
           call add(PN(j)%neighbors, i)
         end if
       end do
-      idx = idx + N - i - 1
     end do
   end function PN
 
