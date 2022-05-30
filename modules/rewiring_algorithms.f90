@@ -1,7 +1,7 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adria Meca Montserrat.
-!Last modified date: 29/05/22.
+!Last modified date: 30/05/22.
 module rewiring_algorithms
   use array_procedures, only : add, find, int_list, int_llist, my_pack
   use network_generation, only : node
@@ -55,10 +55,10 @@ contains
       !network connections.
       if ((t > 1).and.(Q > 0.0d0)) then
         select case (trim(model))
-          case ('RRG')
-            call std_rewiring(network, N, c, Q)
           case ('PN')
             call uni_rewiring(network, N, c, Q)
+          case ('RRG')
+            call std_rewiring(network, N, c, Q)
         end select
       end if
 
