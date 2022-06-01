@@ -2,7 +2,7 @@
 !the precision with which it locates the true patient zero(s) in a network at a
 !certain time t as we vary one of the parameters, leaving all the others fixed.
 !Author: Adria Meca Montserrat.
-!Last modified date: 29/05/22.
+!Last modified date: 31/05/22.
 program patient_zero
   use array_procedures, only : int_llist
   use network_generation, only : node, PN, RRG
@@ -16,11 +16,13 @@ program patient_zero
   character(len=9) :: graph, model, param, scale
 
   double precision, dimension(:, :), allocatable :: rij
-  double precision :: a, alpha, avg_g, avg_prob, avg_prob2, avg_rank, avg_rank2, &
-    b, err_prob, err_rank, l, lambda, mu, nu, point, Q, rank
+  double precision, dimension(3) :: avg_g
+  double precision :: a, alpha, avg_prob, avg_prob2, avg_rank, avg_rank2, b, &
+    err_prob, err_rank, l, lambda, mu, nu, point, Q, rank
 
   integer, dimension(:), allocatable :: ranks
-  integer :: c, gsize, i, instances, N, p, points, seeds, t0
+  integer, dimension(3) :: gsize
+  integer :: c, i, instances, N, p, points, seeds, t0
 
   logical :: dmpr
 
@@ -112,7 +114,7 @@ program patient_zero
 
       !For multiple seeds, we use the average of their ranks as a measure of the
       !efficiency of the algorithm.
-      rank = sum(ranks) / dble(gsize*seeds)
+      rank = sum(ranks) / dble(sum(gsize)*seeds)
 
       !We count in how many instances the algorithm predicts that at least one
       !of the original seeds has a rank that falls within the bottom 1% of the
@@ -139,6 +141,6 @@ program patient_zero
     err_prob = sqrt((avg_prob2-avg_prob**2)/dble(instances-1))
     err_rank = sqrt((avg_rank2-avg_rank**2)/dble(instances-1))
 
-    write(*, '(6es26.16)') point, avg_g/N, avg_rank, err_rank, avg_prob, err_prob
+    write(*, '(9es26.16)') point, avg_g/N, avg_rank, err_rank, avg_prob, err_prob
   end do
 end program patient_zero

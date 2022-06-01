@@ -1,9 +1,9 @@
 !Module whose procedures simulate the patient zero problem in which we try to
 !locate the node(s) that started an epidemic in a given network.
 !Author: Adria Meca Montserrat.
-!Last modified date: 30/05/22.
+!Last modified date: 31/05/22.
 module patient_zero_problem
-  use array_procedures, only : find, int_llist, my_pack, quicksort
+  use array_procedures, only : add, find, int_llist, my_pack, quicksort
   use dmp_algorithms, only : dmp
   use mc_simulations, only : mc_sim
   use network_generation, only : node
@@ -39,7 +39,7 @@ contains
 
     !Output arguments.
     integer, dimension(seeds), intent(out) :: ranks
-    integer, intent(out) :: gsize
+    integer, dimension(:), intent(out) :: gsize
 
     !Local variables.
     character(len=1), dimension(size(history)) :: states
@@ -52,7 +52,7 @@ contains
 
     integer, dimension(:), allocatable :: non_susceptible
     integer, dimension(seeds) :: origins
-    integer :: i, idx, N, node_i, total
+    integer :: counter, i, idx, N, node_i, total
 
 
     !Number of nodes.
@@ -74,14 +74,26 @@ contains
 
     !We look for nodes that are not S in the network at time t0 because they
     !are the ones that possibly started the epidemic.
-    allocate(non_susceptible(N))
-    non_susceptible = [(i, i=1,N)]
-    call my_pack(non_susceptible, states/='S')
-    gsize = size(non_susceptible)
-    allocate(energies(gsize))
+    gsize = 0
+    counter = 0
+    do i = 1, N
+      select case (states(i))
+        case ('S')
+          cycle
+        case ('E')
+          gsize(1) = gsize(1) + 1
+        case ('I')
+          gsize(2) = gsize(2) + 1
+        case ('R')
+          gsize(3) = gsize(3) + 1
+      end select
+      counter = counter + 1
+      call add(non_susceptible, i)
+    end do
+    allocate(energies(counter))
 
     !We loop over each of the non-susceptible nodes.
-    do idx = 1, gsize
+    do idx = 1, counter
       node_i = non_susceptible(idx)
 
       !We apply the DMP(r) algorithm to calculate the marginal probabilities
