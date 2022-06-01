@@ -1,7 +1,7 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adria Meca Montserrat.
-!Last modified date: 30/05/22.
+!Last modified date: 02/06/22.
 module rewiring_algorithms
   use array_procedures, only : add, find, int_list, int_llist, my_pack
   use network_generation, only : node
@@ -108,7 +108,7 @@ contains
     type(node), dimension(:), intent(inout) :: network
 
     !Local variables.
-    integer :: i, idx, j, k, m
+    integer :: i, idx, isize, j, k, ksize, m
 
 
     do idx = 1, N*c/4
@@ -118,14 +118,19 @@ contains
           i = 1 + floor(N*r1279())
           k = 1 + floor(N*r1279())
 
-          !If i and k are different and disconnected, we proceed.
-          if ((i /= k).and.(all(network(i)%neighbors /= k))) then
-            !We choose two random neighbors of i and k, respectively.
-            j = network(i)%neighbors(1 + floor(size(network(i)%neighbors)*r1279()))
-            m = network(k)%neighbors(1 + floor(size(network(k)%neighbors)*r1279()))
+          !We need to check if the nodes i and k have at least one neighbor.
+          isize = size(network(i)%neighbors)
+          ksize = size(network(k)%neighbors)
+          if ((isize > 0).and.(ksize > 0)) then
+            !If i and k are different and disconnected, we proceed.
+            if ((i /= k).and.(all(network(i)%neighbors /= k))) then
+              !We choose two random neighbors of i and k, respectively.
+              j = network(i)%neighbors(1 + floor(isize*r1279()))
+              m = network(k)%neighbors(1 + floor(ksize*r1279()))
 
-            !If j and m are different and disconnected, we proceed.
-            if ((j /= m).and.(all(network(j)%neighbors /= m))) exit
+              !If j and m are different and disconnected, we proceed.
+              if ((j /= m).and.(all(network(j)%neighbors /= m))) exit
+            end if
           end if
         end do
 
