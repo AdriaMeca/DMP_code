@@ -1,6 +1,6 @@
 !Module whose procedures study the properties of networks.
 !Author: Adria Meca Montserrat.
-!Last modified date: 26/05/22.
+!Last modified date: 05/06/22.
 module network_properties
   use network_generation, only : node
 
@@ -67,11 +67,11 @@ contains
 
 
   !Subroutine that writes the information needed for Gnuplot to draw a network.
-  subroutine draw_network(network, positions)
+  subroutine draw_network(network, r)
     implicit none
 
     !Input arguments.
-    double precision, dimension(:, :), intent(in) :: positions
+    double precision, dimension(:, :), intent(in) :: r
 
     type(node), dimension(:), intent(in) :: network
 
@@ -84,7 +84,7 @@ contains
 
     !First, we write the positions of the nodes.
     do i = 1, N
-      write(*, '(2es26.16)') positions(i, :)
+      write(*, '(2es26.16)') r(i, :)
     end do
     write(*, '(a)') achar(10)
 
@@ -94,7 +94,7 @@ contains
       isize = size(network(i)%neighbors)
       do ki = 1, isize
         k = network(i)%neighbors(ki)
-        write(*, '(4es26.16)') positions(i, :), positions(k, :)-positions(i, :)
+        write(*, '(4es26.16)') r(i, :), r(k, :)-r(i, :)
       end do
     end do
     write(*, '(a)') achar(10)
