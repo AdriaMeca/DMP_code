@@ -2,7 +2,7 @@
 !Author: Adria Meca Montserrat.
 !Last modified date: 05/06/22.
 module network_generation
-  use array_procedures, only : add, int_list, int_pair, my_pack
+  use array_procedures, only : add, my_pack
   use random_number_generator, only : r1279
 
   implicit none
@@ -95,128 +95,72 @@ contains
     type(node), dimension(N) :: RRG
 
     !Local variables.
-    double precision :: x
-
     integer, dimension(:), allocatable :: array_u, array_v
-    integer :: i, idx_i, idx_j, idx_k, j, u, v
-
-    type(int_list), dimension(N) :: G
-
-    type(int_pair), dimension(:), allocatable :: array_w
-    type(int_pair) :: link
+    integer :: i, idx_i, idx_j, idx_k, j, total, u, usize, v
 
 
+    !Warning: N * c has to be an even number, otherwise the network cannot be
+    !closed and we are stuck in an infinite loop.
     do while (.true.)
-      allocate(array_u(N*c), array_v(N), array_w(0))
+      allocate(array_u(N*c), array_v(N*c))
 
-      !Step 1.
+      !Step 1: we initialize the network and the arrays.
       do idx_i = 1, N
-        allocate(G(idx_i)%array(c), RRG(idx_i)%neighbors(0))
+        allocate(RRG(idx_i)%neighbors(0))
         do idx_j = 1, c
           idx_k = idx_j + (idx_i-1)*c
 
-          !We define N groups G {G(1), ..., G(N)} that contain c connectors.
-          G(idx_i)%array(idx_j) = idx_k
-
-          !We keep the N*c connectors (where N*c is an even number) in array_u.
+          !We store all connectors in array_u.
           array_u(idx_k) = idx_k
+
+          !Group to which connector 'idx_k' belongs.
+          array_v(idx_k) = idx_i
         end do
-        !We save the available groups in array_v.
-        array_v(idx_i) = idx_i
       end do
 
-      !Step 2.
-      do while (size(array_v) > c)
-        do while (.true.)
-          !We choose two connectors i and j at random.
-          i = array_u(1 + floor(size(array_u)*r1279()))
-          j = array_u(1 + floor(size(array_u)*r1279()))
+      !Step 2: we establish the connections.
+      total = 0
+      usize = N * c
+      do while (usize > 0)
+        !We choose two connectors i and j at random.
+        i = array_u(1 + floor(usize*r1279()))
+        j = array_u(1 + floor(usize*r1279()))
 
-          !i and j belong to groups u and v, respectively.
-          u = ceiling(i/real(c))
-          v = ceiling(j/real(c))
+        !i and j belong to groups u and v, respectively.
+        u = array_v(i)
+        v = array_v(j)
 
-          !If u and v are different and disconnected, we accept i and j.
-          if ((u /= v).and.(all(RRG(u)%neighbors /= v))) exit
-        end do
+        !If u and v are equal or connected, we reject i and j.
+        if ((u == v).or.(any(RRG(u)%neighbors == v))) then
+          total = total + 1
+
+          !If the counter reaches a certain value, we start over.
+          if (total == usize * usize) exit
+          !Otherwise, we keep looking for a suitable pair (i, j).
+          cycle
+        end if
+
+        !If (i, j) is accepted, we reset the counter to zero.
+        total = 0
 
         !We remove i and j from array_u.
         call my_pack(array_u, (array_u/=i).and.(array_u/=j))
 
-        !We remove i and j from their groups.
-        call my_pack(G(u)%array, G(u)%array/=i)
-        call my_pack(G(v)%array, G(v)%array/=j)
-
-        !u and v are removed from array_v if they become empty.
-        if (size(G(u)%array) == 0) call my_pack(array_v, array_v/=u)
-        if (size(G(v)%array) == 0) call my_pack(array_v, array_v/=v)
+        !We update the length of array_u.
+        usize = usize - 2
 
         !We connect u and v.
         call add(RRG(u)%neighbors, v)
         call add(RRG(v)%neighbors, u)
       end do
 
-      !We free array_u from memory because it is no longer needed.
-      deallocate(array_u)
+      !If there are no connectors available, we are done.
+      if (usize == 0) exit
 
-      !We save the remaining possible links {u, v} inside array_w.
-      do idx_i = 1, size(array_v)
-        do idx_j = idx_i+1, size(array_v)
-          u = array_v(idx_i)
-          v = array_v(idx_j)
-
-          if (all(RRG(u)%neighbors /= v)) call add(array_w, int_pair(u, v))
-        end do
-      end do
-
-      !Step 3.
-      do while (size(array_w) > 0)
-        do while (.true.)
-          !We choose a link at random from array_w.
-          link = array_w(1 + floor(size(array_w)*r1279()))
-
-          u = link%x
-          v = link%y
-
-          !We accept u and v considering their size.
-          x = dble(size(G(u)%array) * size(G(v)%array))
-          if (r1279() < x/c**2) exit
-        end do
-
-        !We remove {u, v} from array_w.
-        call my_pack(array_w, (array_w%x/=u).or.(array_w%y/=v))
-
-        !We choose two connectors at random from u and v.
-        i = G(u)%array(1 + floor(size(G(u)%array)*r1279()))
-        j = G(v)%array(1 + floor(size(G(v)%array)*r1279()))
-
-        !We remove i and j from their groups.
-        call my_pack(G(u)%array, G(u)%array/=i)
-        call my_pack(G(v)%array, G(v)%array/=j)
-
-        !u and v are removed from array_v if they become empty. We also
-        !remove links that contain u or v from array_w.
-        if (size(G(u)%array) == 0) then
-          call my_pack(array_v, array_v/=u)
-          call my_pack(array_w, (array_w%x/=u).and.(array_w%y/=u))
-        end if
-        if (size(G(v)%array) == 0) then
-          call my_pack(array_v, array_v/=v)
-          call my_pack(array_w, (array_w%x/=v).and.(array_w%y/=v))
-        end if
-
-        !We connect u and v.
-        call add(RRG(u)%neighbors, v)
-        call add(RRG(v)%neighbors, u)
-      end do
-
-      !If there are no groups available, we are done.
-      if (size(array_v) == 0) exit
-
-      !If the attempt fails, we have to deallocate these arrays and start over.
-      deallocate(array_v, array_w)
+      !If the attempt fails, we have to deallocate everything and start over.
+      deallocate(array_u, array_v)
       do idx_i = 1, N
-        deallocate(G(idx_i)%array, RRG(idx_i)%neighbors)
+        deallocate(RRG(idx_i)%neighbors)
       end do
     end do
   end function RRG
