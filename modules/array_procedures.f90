@@ -1,6 +1,6 @@
 !Module whose procedures create, modify and study arrays.
 !Author: Adria Meca Montserrat.
-!Last modified date: 26/05/22.
+!Last modified date: 05/06/22.
 module array_procedures
   implicit none
 
@@ -21,14 +21,9 @@ module array_procedures
     type(int_list), dimension(:), allocatable :: time
   end type int_llist
 
-  !Pair of integers.
-  type, public :: int_pair
-    integer :: x, y
-  end type int_pair
-
   !Interface that adds elements to lists.
   interface add
-    module procedure add_dbl, add_int, add_int_list, add_int_pair
+    module procedure add_dbl, add_int, add_int_list
   end interface add
 
   !Interface that searches for elements in lists.
@@ -43,7 +38,7 @@ module array_procedures
 
   !Interface that filters different lists given a condition.
   interface my_pack
-    module procedure my_pack_int, my_pack_int_pair
+    module procedure my_pack_int
   end interface my_pack
 
   public add, find, idx_insertion_sort, my_pack, pop, quicksort
@@ -285,46 +280,6 @@ contains
 
 
 
-  !Subroutine that adds an int_pair to a list of pairs (of integers).
-  subroutine add_int_pair(list, element)
-    implicit none
-
-    !Input/output arguments.
-    type(int_pair), dimension(:), allocatable, intent(inout) :: list
-    type(int_pair), intent(in) :: element
-
-    !Local variables.
-    integer :: isize
-
-    type(int_pair), dimension(:), allocatable :: copy_list
-
-
-    if (allocated(list)) then
-      !We create a temporary list with one more element than the original.
-      isize = size(list)
-      allocate(copy_list(1+isize))
-
-      !We copy the elements from the old list to the new one and add the
-      !new element.
-      copy_list(1:isize) = list
-      copy_list(1+isize) = element
-
-      !We deallocate the original list, make it bigger and transfer all
-      !the elements to it, including the new one. Then, we deallocate
-      !the temporary list because we do not need it anymore.
-      deallocate(list)
-      allocate(list(1+isize))
-      list = copy_list
-      deallocate(copy_list)
-    else
-      !If the original list has no elements, we pass the new item to it.
-      allocate(list(1))
-      list(1) = element
-    end if
-  end subroutine add_int_pair
-
-
-
   !Custom version of the PACK function provided by GFortran that applies to
   !lists of integers.
   subroutine my_pack_int(list, condition)
@@ -368,53 +323,6 @@ contains
       end do
     end if
   end subroutine my_pack_int
-
-
-
-  !Custom version of the PACK function provided by GFortran that applies to
-  !lists of integer pairs.
-  subroutine my_pack_int_pair(list, condition)
-    implicit none
-
-    !Input/output arguments.
-    logical, dimension(:), intent(in) :: condition
-
-    type(int_pair), dimension(:), allocatable, intent(inout) :: list
-
-    !Local variables.
-    integer :: i, j, new_size, old_size
-
-    type(int_pair), dimension(:), allocatable :: copy_list
-
-
-    if (.not.allocated(list)) then
-      print*, 'An attempt was made to filter an unallocated list.'
-      return
-    end if
-
-    !We transfer all elements from list to copy_list.
-    old_size = size(list)
-    allocate(copy_list(old_size))
-    copy_list = list
-
-    !We compute the new size of the list based on the number of true elements
-    !in the boolean array called condition.
-    new_size = count(condition)
-    deallocate(list)
-    allocate(list(new_size))
-
-    !If the new size is greater than zero, we pass all the elements that meet
-    !the condition to our list.
-    if (new_size > 0) then
-      j = 1
-      do i = 1, old_size
-        if (condition(i)) then
-          list(j) = copy_list(i)
-          j = j + 1
-        end if
-      end do
-    end if
-  end subroutine my_pack_int_pair
 
 
 
