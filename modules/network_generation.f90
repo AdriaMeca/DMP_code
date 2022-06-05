@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
 !Author: Adria Meca Montserrat.
-!Last modified date: 30/05/22.
+!Last modified date: 05/06/22.
 module network_generation
   use array_procedures, only : add, int_list, int_pair, my_pack
   use random_number_generator, only : r1279
@@ -20,11 +20,11 @@ contains
   !links are established based on the distance between nodes. A parameter l
   !controls the magnitude of the distances: larger values of l favor longer
   !connections.
-  function PN(N, c, rij, l)
+  function PN(N, c, r, l)
     implicit none
 
     !Input arguments.
-    double precision, dimension(:, :), intent(in) :: rij
+    double precision, dimension(:, :), intent(in) :: r
     double precision, intent(in) :: l
 
     integer, intent(in) :: c, N
@@ -33,19 +33,26 @@ contains
     type(node), dimension(N) :: PN
 
     !Local variables.
-    double precision :: A, dij, pij
+    double precision :: A, dij, pij, side, xij, yij
 
     integer :: i, j
 
 
-    !We calculate the table of exponentials and the normalization constant A.
+    !Side of the 2-dimensional box where the nodes are confined.
+    side = sqrt(dble(N))
+
+    !We calculate the normalization constant A.
     A = 0.0d0
     do i = 1, N
       !We initialize the list of neighbors.
       allocate(PN(i)%neighbors(0))
       do j = i+1, N
+        !Periodic Boundary Conditions (PBC).
+        xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
+        yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
+
         !Distance between nodes i and j.
-        dij = sqrt(sum((rij(i, :)-rij(j, :))**2))
+        dij = sqrt(xij*xij + yij*yij)
 
         !We increment the value of A.
         A = A + exp(-dij/l)
@@ -58,8 +65,12 @@ contains
     !We connect the nodes.
     do i = 1, N
       do j = i+1, N
+        !PBC.
+        xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
+        yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
+
         !Distance between nodes i and j.
-        dij = sqrt(sum((rij(i, :)-rij(j, :))**2))
+        dij = sqrt(xij*xij + yij*yij)
 
         !We decide if i and j are connected or not.
         if (r1279() < pij*exp(-dij/l)) then
