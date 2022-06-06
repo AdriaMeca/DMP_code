@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
 !Author: Adria Meca Montserrat.
-!Last modified date: 05/06/22.
+!Last modified date: 06/06/22.
 module network_generation
   use array_procedures, only : add, my_pack
   use random_number_generator, only : r1279
@@ -38,7 +38,7 @@ contains
     integer :: i, j
 
 
-    !Side of the 2-dimensional box where the nodes are confined.
+    !Side of the two-dimensional box where the nodes are confined.
     side = sqrt(dble(N))
 
     !We calculate the normalization constant A.
@@ -54,7 +54,7 @@ contains
         !Distance between nodes i and j.
         dij = sqrt(xij*xij + yij*yij)
 
-        !We increment the value of A.
+        !We update the value of A.
         A = A + exp(-dij/l)
       end do
     end do
@@ -69,7 +69,6 @@ contains
         xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
         yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
 
-        !Distance between nodes i and j.
         dij = sqrt(xij*xij + yij*yij)
 
         !We decide if i and j are connected or not.
@@ -122,7 +121,7 @@ contains
       total = 0
       usize = N * c
       do while (usize > 0)
-        !We choose two connectors i and j at random.
+        !We choose two connectors i and j uniformly at random.
         i = array_u(1 + floor(usize*r1279()))
         j = array_u(1 + floor(usize*r1279()))
 
@@ -131,7 +130,7 @@ contains
         v = array_v(j)
 
         !If u and v are equal or connected, we reject i and j.
-        if ((u == v).or.(any(RRG(u)%neighbors == v))) then
+        if ((u == v).or.any(RRG(u)%neighbors == v)) then
           total = total + 1
 
           !If the counter reaches a certain value, we start over.
