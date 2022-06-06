@@ -1,2 +1,2 @@
-#Ignore the folder where I test the code.
-testing/
+#Ignore all files and directories whose name starts with 'test'.
+test*
