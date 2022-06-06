@@ -1,6 +1,6 @@
 !Module whose procedures generate random numbers.
 !Authors: Matteo Palassini and Adria Meca Montserrat.
-!Last modified date: 26/05/22.
+!Last modified date: 06/06/22.
 module random_number_generator
   implicit none
 
@@ -12,9 +12,37 @@ module random_number_generator
   integer, dimension(0:2047) :: index1, index2, irand
   integer :: ioffset
 
-  public r1279, setr1279
+  public ir1279, r1279, setr1279
 
 contains
+  !Function that generates random integers between 0 and maxint.
+  function ir1279()
+    implicit none
+
+    !Output arguments.
+    integer :: ir1279
+
+
+    ioffset = iand(ioffset+1, 2047)
+    irand(ioffset) = irand(index1(ioffset)) * irand(index2(ioffset))
+    ir1279 = ishft(irand(ioffset), -1)
+  end function ir1279
+
+
+
+  !Function that generates random doubles between 0.0 and 1.0.
+  function r1279()
+    implicit none
+
+    !Output arguments.
+    double precision :: r1279
+
+
+    r1279 = ir1279() * inv_maxint
+  end function r1279
+
+
+
   !L'Ecuyer's long-period random number generator (> 2x10^{18}) with Bays-Durham
   !shuffle and additional safeguards. Returns a uniform random deviation between
   !0.0 and 1.0 (excluding endpoint values). Call with idum a negative integer to
@@ -88,27 +116,6 @@ contains
     !Because users do not expect endpoint values.
     ran2 = min(am*iy, rnmx)
   end function ran2
-
-
-
-  !Function that generates random doubles between 0.0 and 1.0.
-  function r1279()
-    implicit none
-
-    !Output arguments.
-    double precision :: r1279
-
-    !Local variables.
-    integer :: ir1279
-
-
-    !We generate a random integer between 0 and maxint.
-    ioffset = iand(ioffset+1, 2047)
-    irand(ioffset) = irand(index1(ioffset)) * irand(index2(ioffset))
-    ir1279 = ishft(irand(ioffset), -1)
-
-    r1279 = ir1279 * inv_maxint
-  end function r1279
 
 
 
