@@ -1,6 +1,6 @@
 !Module whose procedures create different networks.
 !Author: Adria Meca Montserrat.
-!Last modified date: 06/06/22.
+!Last modified date: 07/06/22.
 module network_generation
   use array_procedures, only : add, my_pack
   use random_number_generator, only : r1279
@@ -60,7 +60,7 @@ contains
     end do
 
     !Constant part of the probability of connecting any pair of nodes.
-    pij = c * N / 2.0d0 / A
+    pij = N * c / 2.0d0 / A
 
     !We connect the nodes.
     do i = 1, N
@@ -122,8 +122,8 @@ contains
       usize = N * c
       do while (usize > 0)
         !We choose two connectors i and j uniformly at random.
-        i = array_u(1 + floor(usize*r1279()))
-        j = array_u(1 + floor(usize*r1279()))
+        i = array_u(1 + mod(int(usize*r1279()), usize))
+        j = array_u(1 + mod(int(usize*r1279()), usize))
 
         !i and j belong to groups u and v, respectively.
         u = array_v(i)

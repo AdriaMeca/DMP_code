@@ -1,7 +1,7 @@
 !Module whose procedures modify the connections of a network, creating a history
 !of the changes.
 !Author: Adria Meca Montserrat.
-!Last modified date: 06/06/22.
+!Last modified date: 07/06/22.
 module rewiring_algorithms
   use array_procedures, only : add, find, int_list, int_llist, my_pack
   use network_generation, only : node
@@ -133,7 +133,7 @@ contains
     end do
 
     !Constant part of the probability of connecting any pair of nodes.
-    pij = c * N / 2.0d0 / A
+    pij = N * c / 2.0d0 / A
 
     !Calculation of the upper value B of the 'tower' associated with each node.
     B = 0.0d0
@@ -153,7 +153,7 @@ contains
       if (r1279() < Q) then
         do while (.true.)
           !We choose a node i uniformly at random.
-          i = 1 + floor(N*r1279())
+          i = 1 + mod(int(N*r1279()), N)
 
           !We choose a node j at random using the tower method.
           cum = 0.0d0
@@ -175,13 +175,13 @@ contains
           !If i and j are different and disconnected, we proceed.
           if ((i /= j).and.all(network(i)%neighbors /= j)) then
             !We choose a node k uniformly at random.
-            k = 1 + floor(N*r1279())
+            k = 1 + mod(int(N*r1279()), N)
 
             !If k has neighbors, we proceed.
             ksize = size(network(k)%neighbors)
             if (ksize > 0) then
               !We choose a neighbor of k uniformly at random.
-              m = network(k)%neighbors(1 + floor(ksize*r1279()))
+              m = network(k)%neighbors(1 + mod(int(ksize*r1279()), ksize))
               exit
             end if
           end if
@@ -221,8 +221,8 @@ contains
       if (r1279() < Q) then
         do while (.true.)
           !We choose two nodes uniformly at random.
-          i = 1 + floor(N*r1279())
-          k = 1 + floor(N*r1279())
+          i = 1 + mod(int(N*r1279()), N)
+          k = 1 + mod(int(N*r1279()), N)
 
           !We need to check if the nodes i and k have at least one neighbor.
           isize = size(network(i)%neighbors)
@@ -231,8 +231,8 @@ contains
             !If i and k are different and disconnected, we proceed.
             if ((i /= k).and.all(network(i)%neighbors /= k)) then
               !We choose a neighbor of each node uniformly at random.
-              j = network(i)%neighbors(1 + floor(isize*r1279()))
-              m = network(k)%neighbors(1 + floor(ksize*r1279()))
+              j = network(i)%neighbors(1 + mod(int(isize*r1279()), isize))
+              m = network(k)%neighbors(1 + mod(int(ksize*r1279()), ksize))
 
               !If j and m are different and disconnected, we proceed.
               if ((j /= m).and.all(network(j)%neighbors /= m)) exit
@@ -277,19 +277,19 @@ contains
       if (r1279() < Q) then
         do while (.true.)
           !We choose two nodes uniformly at random.
-          i = 1 + floor(N*r1279())
-          k = 1 + floor(N*r1279())
+          i = 1 + mod(int(N*r1279()), N)
+          k = 1 + mod(int(N*r1279()), N)
 
           !If i and k are different and disconnected, we proceed.
           if ((i /= k).and.all(network(i)%neighbors /= k)) then
             !We choose a node uniformly at random.
-            j = 1 + floor(N*r1279())
+            j = 1 + mod(int(N*r1279()), N)
 
             !If j has neighbors, we proceed.
             jsize = size(network(j)%neighbors)
             if (jsize > 0) then
               !We choose a neighbor of j uniformly at random.
-              m = network(j)%neighbors(1 + floor(jsize*r1279()))
+              m = network(j)%neighbors(1 + mod(int(jsize*r1279()), jsize))
               exit
             end if
           end if

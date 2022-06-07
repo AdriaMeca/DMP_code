@@ -1,7 +1,7 @@
 !Module whose procedures simulate the patient zero problem in which we try to
 !locate the node(s) that started an epidemic in a given network.
 !Author: Adria Meca Montserrat.
-!Last modified date: 31/05/22.
+!Last modified date: 07/06/22.
 module patient_zero_problem
   use array_procedures, only : add, find, int_llist, my_pack, quicksort
   use dmp_algorithms, only : dmp
@@ -61,7 +61,7 @@ contains
     !We neglect those cases where the epidemic does not spread.
     do while (.true.)
       !We choose the origins at random.
-      origins = [(1 + floor(N*r1279()), i=1,seeds)]
+      origins = [(1 + mod(int(N*r1279()), N), i=1,seeds)]
 
       !We apply a Monte Carlo simulation to spread an infection on the network
       !using the rules of the S(E)IR model.
