@@ -1,6 +1,6 @@
 !Module whose procedures generate random numbers.
 !Authors: Matteo Palassini and Adria Meca Montserrat.
-!Last modified date: 06/06/22.
+!Last modified date: 07/06/22.
 module random_number_generator
   implicit none
 
@@ -15,7 +15,8 @@ module random_number_generator
   public ir1279, r1279, setr1279
 
 contains
-  !Function that generates random integers between 0 and maxint.
+  !Function that returns random integers from the uniform distribution over the
+  !interval [0, maxint].
   function ir1279()
     implicit none
 
@@ -30,7 +31,8 @@ contains
 
 
 
-  !Function that generates random doubles between 0.0 and 1.0.
+  !Function that returns random doubles from the uniform distribution over the
+  !interval [0.0, 1.0].
   function r1279()
     implicit none
 
