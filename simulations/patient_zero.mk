@@ -1,5 +1,5 @@
 #Author: Adria Meca Montserrat.
-#Last modified date: 30/05/22.
+#Last modified date: 14/06/22.
 
 #Function that filters the strings that contain the substring 'v' from a given
 #list of strings.
@@ -31,11 +31,11 @@ exe := $(patsubst %.o,%.exe,$(obj))
 
 #Compilation instructions.
 $(exe): $(obj)
-	@gfortran $(objects) $< -o $@
+	gfortran $(objects) $< -o $@
 $(obj): $(src) $(objects)
-	@gfortran $(options) -c $< -o $@
+	gfortran $(options) -c $< -o $@
 $(objects): $(obj_dir)%.o: $(modules)%.f90
-	@gfortran $(options) -c $< -o $@
+	gfortran $(options) -c $< -o $@
 
 #Module interdependencies.
 $(out_list): $(obj_dir)array_procedures.o
