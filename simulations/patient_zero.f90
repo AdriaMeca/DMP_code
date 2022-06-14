@@ -62,7 +62,7 @@ program patient_zero
   !Headers.
   write(*, '(a,i0)') '# N=', N
   write(*, '(a,a25,8a26)') '#', 'x', 'I', 'R', 'r0', 'dr0', 'r0/G', 'd(r0/G)', &
-    'P(r0=0)', 'P(r0<=x)'
+    'P(r0=0)', 'P(r0<=r)'
 
   do p = 1, points
     !We restart the random sequence.
