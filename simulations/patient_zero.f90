@@ -135,7 +135,7 @@ program patient_zero
       avg_norm2 = avg_norm2 + norm*norm
     end do
 
-    !Normalization of the main magitudes.
+    !Normalization of the main magnitudes.
     avg_g = avg_g / instances
     avg_norm = avg_norm / instances
     avg_prob = avg_prob / instances
