@@ -35,7 +35,7 @@ program patient_zero
 
 
   !Parameters.
-  open(unit=10, file='parameters.txt')
+  open(unit=10, file='patient_zero.txt')
     read(10, *) rng
     read(10, *) dmpr
     read(10, *) c, l, N
