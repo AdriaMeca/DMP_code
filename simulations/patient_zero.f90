@@ -2,7 +2,7 @@
 !the precision with which it locates the true patient zero(s) in a network at a
 !certain time t as we vary one of the parameters, leaving all the others fixed.
 !Author: Adria Meca Montserrat.
-!Last modified date: 06/06/22.
+!Last modified date: 14/06/22.
 program patient_zero
   use array_procedures, only : int_llist
   use network_generation, only : node, PN, RRG
@@ -13,14 +13,16 @@ program patient_zero
   implicit none
 
   !Variables.
+  character(len=1), dimension(:), allocatable :: states
   character(len=9) :: graph, model, param, scale
 
   double precision, dimension(:, :), allocatable :: r
   double precision, dimension(3) :: avg_g
-  double precision :: a, alpha, avg_prob, avg_rank, avg_rank2, b, err_rank, l, &
-    lambda, mu, nu, point, Q, rank
+  double precision :: a, alpha, avg_norm, avg_norm2, avg_prob, avg_rank, &
+    avg_rank2, avg_true, b, err_norm, err_rank, l, lambda, mu, norm, nu, &
+    point, Q, rank
 
-  integer, dimension(:), allocatable :: ranks
+  integer, dimension(:), allocatable :: origins, ranks
   integer, dimension(8) :: values
   integer, dimension(3) :: gsize
   integer :: c, i, idx, instances, iseed, N, p, points, seeds, t0
@@ -42,7 +44,8 @@ program patient_zero
     read(10, *) seeds, alpha, lambda, mu, nu, t0, Q
   close(10)
 
-  allocate(history(N), indices(N), network(N), r(N, 2), ranks(seeds))
+  allocate(history(N), indices(N), network(N), r(N, 2), states(N))
+  allocate(origins(seeds), ranks(seeds))
 
   !We initialize the random number generator.
   if (rng) then
@@ -55,6 +58,11 @@ program patient_zero
 
   !Initialization of the node positions.
   r = sqrt(dble(N)) * reshape([(r1279(), i=1,2*N)], [N, 2])
+
+  !Headers.
+  write(*, '(a,i0)') '# N=', N
+  write(*, '(a,a25,8a26)') '#', 'x', 'I', 'R', 'r0', 'dr0', 'r0/G', 'd(r0/G)', &
+    'P(r0=0)', 'P(r0<=x)'
 
   do p = 1, points
     !We restart the random sequence.
@@ -80,9 +88,12 @@ program patient_zero
 
     !Initialization of the average quantities.
     avg_g = 0.0d0
+    avg_norm = 0.0d0
     avg_prob = 0.0d0
     avg_rank = 0.0d0
+    avg_true = 0.0d0
     avg_rank2 = 0.0d0
+    avg_norm2 = 0.0d0
 
     do idx = 1, instances
       !We create a network of the chosen type.
@@ -97,11 +108,17 @@ program patient_zero
       call rewiring(graph, network, history, indices, c, t0, r, l, Q)
 
       !We compute the ranks of the seeds and the size of the epidemic.
-      call pz_sim(model, dmpr, history, indices, seeds, ranks, gsize, alpha, &
-        lambda, mu, nu, t0)
+      call pz_sim(model, dmpr, history, indices, seeds, states, origins, ranks, &
+        gsize, alpha, lambda, mu, nu, t0)
 
       !We use the average of the rank of the seeds as a measure of performance.
-      rank = sum(ranks) / dble(sum(gsize)*seeds)
+      rank = sum(ranks) / dble(seeds)
+      norm = rank / sum(gsize)
+
+      !We count in how many instances the algorithm finds the true patient zero.
+      if (any(ranks == 0)) then
+        avg_true = avg_true + 1.0d0
+      end if
 
       !We count in how many instances the algorithm predicts that at least one
       !of the original seeds has a rank that falls within the bottom 1% of the
@@ -112,19 +129,26 @@ program patient_zero
 
       !We accumulate the quantities of interest.
       avg_g = avg_g + dble(gsize)
+      avg_norm = avg_norm + norm
       avg_rank = avg_rank + rank
       avg_rank2 = avg_rank2 + rank*rank
+      avg_norm2 = avg_norm2 + norm*norm
     end do
 
     !Normalization of the main magitudes.
     avg_g = avg_g / instances
+    avg_norm = avg_norm / instances
     avg_prob = avg_prob / instances
     avg_rank = avg_rank / instances
+    avg_true = avg_true / instances
     avg_rank2 = avg_rank2 / instances
+    avg_norm2 = avg_norm2 / instances
 
-    !Uncertainty associated with the rank.
-    err_rank = sqrt((avg_rank2-avg_rank**2)/dble(instances-1))
+    !Uncertainty associated with the (normalized) rank.
+    err_norm = sqrt(abs(avg_norm2-avg_norm**2)/dble(instances-1))
+    err_rank = sqrt(abs(avg_rank2-avg_rank**2)/dble(instances-1))
 
-    write(*, '(7es26.16)') point, avg_g/N, avg_rank, err_rank, avg_prob
+    write(*, '(9es26.16)') point, avg_g(2:3), avg_rank, err_rank, avg_norm, &
+      err_norm, avg_true, avg_prob
   end do
 end program patient_zero
