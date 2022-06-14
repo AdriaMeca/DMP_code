@@ -1,7 +1,7 @@
 !Module whose procedures simulate the patient zero problem in which we try to
 !locate the node(s) that started an epidemic in a given network.
 !Author: Adria Meca Montserrat.
-!Last modified date: 07/06/22.
+!Last modified date: 14/06/22.
 module patient_zero_problem
   use array_procedures, only : add, find, int_llist, my_pack, quicksort
   use dmp_algorithms, only : dmp
@@ -20,8 +20,8 @@ contains
   !of an epidemic, we rank the non-susceptible nodes by their energy, which is
   !calculated using the marginal DMP probabilities. Then, we extract the ranks
   !the algorithm gives to the original seeds and the size of the epidemic.
-  subroutine pz_sim(model, dmpr, history, indices, seeds, ranks, gsize, alpha, &
-    lambda, mu, nu, t0)
+  subroutine pz_sim(model, dmpr, history, indices, seeds, states, origins, ranks, &
+    gsize, alpha, lambda, mu, nu, t0)
     implicit none
 
     !Input arguments.
@@ -38,12 +38,11 @@ contains
     type(node), dimension(:), intent(in) :: history
 
     !Output arguments.
-    integer, dimension(seeds), intent(out) :: ranks
-    integer, dimension(:), intent(out) :: gsize
+    character(len=1), dimension(:), intent(out) :: states
+
+    integer, dimension(:), intent(out) :: gsize, origins, ranks
 
     !Local variables.
-    character(len=1), dimension(size(history)) :: states
-
     double precision, dimension(t0, 4) :: tmp_dmp_probs, tmp_mc_probs
     double precision, dimension(:), allocatable :: energies
     double precision, dimension(size(history)) :: ps, pe, pi, pr
@@ -51,7 +50,6 @@ contains
     double precision :: joint
 
     integer, dimension(:), allocatable :: non_susceptible
-    integer, dimension(seeds) :: origins
     integer :: counter, i, idx, N, node_i, total
 
 
