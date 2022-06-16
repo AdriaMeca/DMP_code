@@ -1,6 +1,6 @@
 !Simulation that compares the trajectories given by DMP and MC.
 !Author: Adria Meca Montserrat.
-!Last modified date: 14/06/22.
+!Last modified date: 16/06/22.
 program trajectories
   use array_procedures, only : int_llist
   use dmp_algorithms, only : dmp
@@ -82,38 +82,40 @@ program trajectories
     !We rewire the connections of the network.
     call rewiring(graph, network, history, indices, c, t0, r, l, Q)
 
-    !We compare the DMP and MC trajectories for a given pair (mu, lambda).
-    if (trim(mode) == 'line') then
-      !DMP.
-      call dmp(model, dmpr, history, indices, states, origins, alpha, &
-        lambda, mu, nu, t0, ps, pe, pi, pr, tmp_dmp)
+    select case (trim(mode))
+      !We compare the DMP and MC trajectories for a given pair (mu, lambda).
+      case ('line')
+        !DMP.
+        call dmp(model, dmpr, history, indices, states, origins, alpha, lambda, &
+          mu, nu, t0, ps, pe, pi, pr, tmp_dmp)
 
-      !MC.
-      call mc_sim(model, history, indices, origins, alpha, lambda, mu, nu, &
-        t0, states, M, tmp_mc)
+        !MC.
+        call mc_sim(model, history, indices, origins, alpha, lambda, mu, nu, &
+          t0, states, M, tmp_mc)
 
-      avg_mc = avg_mc + tmp_mc
-      avg_dmp = avg_dmp + tmp_dmp
-    !We compute the square root of the difference squared between the DMP and MC
-    !trajectories for each point (mu, lambda) in a given grid.
-    else if (trim(mode) == 'grid') then
-      do y = 1, points
-        lambda = (y-1) / dble(points-1)
-        do x = 1, points
-          mu = (x-1) / dble(points-1)
+        avg_mc = avg_mc + tmp_mc
+        avg_dmp = avg_dmp + tmp_dmp
+      !We compute the difference between the DMP and MC trajectories for each
+      !point (mu, lambda) in a given grid.
+      case ('grid')
+        do y = 1, points
+          lambda = (y-1) / dble(points-1)
 
-          !DMP.
-          call dmp(model, dmpr, history, indices, states, origins, alpha, &
-            lambda, mu, nu, t0, ps, pe, pi, pr, tmp_dmp)
+          do x = 1, points
+            mu = (x-1) / dble(points-1)
 
-          !MC.
-          call mc_sim(model, history, indices, origins, alpha, lambda, mu, nu, &
-            t0, states, M, tmp_mc)
+            !DMP.
+            call dmp(model, dmpr, history, indices, states, origins, alpha, &
+              lambda, mu, nu, t0, ps, pe, pi, pr, tmp_dmp)
 
-          grid(x, y) = grid(x, y) + sum(sqrt((tmp_dmp(:, s)-tmp_mc(:, s))**2))/t0
+            !MC.
+            call mc_sim(model, history, indices, origins, alpha, lambda, mu, &
+              nu, t0, states, M, tmp_mc)
+
+            grid(x, y) = grid(x, y) + sum(abs(tmp_dmp(:, s)-tmp_mc(:, s)))
+          end do
         end do
-      end do
-    end if
+    end select
   end do
 
   !Normalization of the main magnitudes.
@@ -131,7 +133,7 @@ program trajectories
       end do
     case ('grid')
       !Headers.
-      write(*, '(a,a25,2a26)') '#', 'mu', 'lambda', 'SRDS'
+      write(*, '(a,a25,2a26)') '#', 'mu', 'lambda', 'Difference'
 
       do y = 1, points
         lambda = (y-1) / dble(points-1)
