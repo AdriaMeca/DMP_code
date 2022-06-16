@@ -2,7 +2,7 @@
 !the precision with which it locates the true patient zero(s) in a network at a
 !certain time t as we vary one of the parameters, leaving all the others fixed.
 !Author: Adria Meca Montserrat.
-!Last modified date: 14/06/22.
+!Last modified date: 16/06/22.
 program patient_zero
   use array_procedures, only : int_llist
   use network_generation, only : node, PN, RRG
@@ -25,7 +25,7 @@ program patient_zero
   integer, dimension(:), allocatable :: origins, ranks
   integer, dimension(8) :: values
   integer, dimension(3) :: gsize
-  integer :: c, i, idx, instances, iseed, N, p, points, seeds, t0
+  integer :: c, guess, i, idx, instances, iseed, N, p, points, seeds, t0
 
   logical :: dmpr, rng
 
@@ -109,7 +109,7 @@ program patient_zero
 
       !We compute the ranks of the seeds and the size of the epidemic.
       call pz_sim(model, dmpr, history, indices, seeds, states, origins, ranks, &
-        gsize, alpha, lambda, mu, nu, t0)
+        guess, gsize, alpha, lambda, mu, nu, t0)
 
       !We use the average of the rank of the seeds as a measure of performance.
       rank = sum(ranks) / dble(seeds)

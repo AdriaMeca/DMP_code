@@ -1,7 +1,7 @@
 !Module whose procedures simulate the patient zero problem in which we try to
 !locate the node(s) that started an epidemic in a given network.
 !Author: Adria Meca Montserrat.
-!Last modified date: 14/06/22.
+!Last modified date: 16/06/22.
 module patient_zero_problem
   use array_procedures, only : add, find, int_llist, my_pack, quicksort
   use dmp_algorithms, only : dmp
@@ -20,8 +20,8 @@ contains
   !of an epidemic, we rank the non-susceptible nodes by their energy, which is
   !calculated using the marginal DMP probabilities. Then, we extract the ranks
   !the algorithm gives to the original seeds and the size of the epidemic.
-  subroutine pz_sim(model, dmpr, history, indices, seeds, states, origins, ranks, &
-    gsize, alpha, lambda, mu, nu, t0)
+  subroutine pz_sim(model, dmpr, history, indices, seeds, states, origins, &
+    ranks, guess, gsize, alpha, lambda, mu, nu, t0)
     implicit none
 
     !Input arguments.
@@ -41,6 +41,7 @@ contains
     character(len=1), dimension(:), intent(out) :: states
 
     integer, dimension(:), intent(out) :: gsize, origins, ranks
+    integer :: guess
 
     !Local variables.
     double precision, dimension(t0, 4) :: tmp_dmp_probs, tmp_mc_probs
@@ -142,5 +143,7 @@ contains
     call quicksort(energies, non_susceptible)
     !We compute the ranks of the true seeds.
     ranks = [(find(non_susceptible, origins(i))-1, i=1,seeds)]
+    !We return the node that the algorithm believes to be the true patient zero.
+    guess = non_susceptible(1)
   end subroutine pz_sim
 end module patient_zero_problem
