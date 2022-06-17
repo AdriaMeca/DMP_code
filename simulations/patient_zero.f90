@@ -2,7 +2,7 @@
 !the precision with which it locates the true patient zero(s) in a network at a
 !certain time t as we vary one of the parameters, leaving all the others fixed.
 !Author: Adria Meca Montserrat.
-!Last modified date: 16/06/22.
+!Last modified date: 17/06/22.
 program patient_zero
   use array_procedures, only : int_llist
   use network_generation, only : node, PN, RRG
@@ -44,8 +44,10 @@ program patient_zero
     read(10, *) seeds, alpha, lambda, mu, nu, t0, Q
   close(10)
 
-  allocate(history(N), indices(N), network(N), r(N, 2), states(N))
-  allocate(origins(seeds), ranks(seeds))
+  allocate(r(N, 2))
+
+  allocate(history(N), indices(N), network(N), origins(seeds), ranks(seeds), &
+    states(N))
 
   !We initialize the random number generator.
   if (rng) then

@@ -1,6 +1,6 @@
 !Simulation that compares the trajectories given by DMP and MC.
 !Author: Adria Meca Montserrat.
-!Last modified date: 16/06/22.
+!Last modified date: 17/06/22.
 program trajectories
   use array_procedures, only : int_llist
   use dmp_algorithms, only : dmp
@@ -44,8 +44,8 @@ program trajectories
   allocate(avg_dmp(t0, 4), avg_mc(t0, 4), grid(points, points), r(N, 2), &
     tmp_dmp(t0, 4), tmp_mc(t0, 4))
 
-  allocate(history(N), indices(N), network(N), origins(seeds), states(N), &
-    pe(N), pi(N), pr(N), ps(N))
+  allocate(history(N), indices(N), network(N), origins(seeds), pe(N), pi(N), &
+    pr(N), ps(N), states(N))
 
   !We initialize the random number generator.
   if (rng) then
@@ -133,7 +133,7 @@ program trajectories
       end do
     case ('grid')
       !Headers.
-      write(*, '(a,a25,2a26)') '#', 'mu', 'lambda', 'Difference'
+      write(*, '(a,a25,2a26)') '#', 'mu', 'lambda', 'difference'
 
       do y = 1, points
         lambda = (y-1) / dble(points-1)
