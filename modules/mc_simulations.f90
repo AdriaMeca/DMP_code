@@ -2,7 +2,7 @@
 !dynamic networks using Monte Carlo algorithms that impose different
 !epidemiological models (SIR and SEIR).
 !Author: Adria Meca Montserrat.
-!Last modified date: 26/05/22.
+!Last modified date: 17/06/22.
 module mc_simulations
   use array_procedures, only : int_llist
   use network_generation, only : node
@@ -41,7 +41,6 @@ contains
     !Local variables.
     character(len=1), dimension(size(history)) :: auxsts
 
-    double precision, dimension(t0, 4) :: mc_probs
     double precision :: altalpha, altlambda, altmu, altnu, p1, p2, r
 
     integer, dimension(:), allocatable :: nbrs
@@ -72,7 +71,6 @@ contains
       !We initialize an auxiliary array of states.
       auxsts = states
 
-      mc_probs = 0.0d0
       do t = 1, t0
         !We apply the MC core to modify the states using the S(E)IR rules.
         do i = 1, N
@@ -107,24 +105,21 @@ contains
         do i = 1, N
           select case (states(i))
             case ('S')
-              mc_probs(t, 1) = mc_probs(t, 1) + 1.0d0
+              tmp_mc_probs(t, 1) = tmp_mc_probs(t, 1) + 1.0d0
             case ('E')
-              mc_probs(t, 2) = mc_probs(t, 2) + 1.0d0
+              tmp_mc_probs(t, 2) = tmp_mc_probs(t, 2) + 1.0d0
             case ('I')
-              mc_probs(t, 3) = mc_probs(t, 3) + 1.0d0
+              tmp_mc_probs(t, 3) = tmp_mc_probs(t, 3) + 1.0d0
             case ('R')
-              mc_probs(t, 4) = mc_probs(t, 4) + 1.0d0
+              tmp_mc_probs(t, 4) = tmp_mc_probs(t, 4) + 1.0d0
           end select
         end do
       end do
-      !We divide the above quantities by N, thus obtaining the time evolution
-      !of the fraction of nodes that are in state X (i.e., S, E, I or R); we
-      !compute this trajectory over different realizations and add them all.
-      tmp_mc_probs = tmp_mc_probs + mc_probs/N
     end do
-    !We divide the cumulative trajectory by the number of realizations, thus
-    !obtaining the average trajectory.
-    tmp_mc_probs = tmp_mc_probs / realizations
+    !We divide the previous quantities by N * realizations, thus obtaining the
+    !average trajectory of the fraction of nodes that are in state X (i.e., S,
+    !E, I or R).
+    tmp_mc_probs = tmp_mc_probs / N / realizations
 
     !If we are considering the SIR model, in the end we have to perform the
     !following exchanges: (PE, PI, PR) --> (0.0, PE, PI) and ('E', 'I') -->
