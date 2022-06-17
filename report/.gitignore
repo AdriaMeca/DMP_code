@@ -1,0 +1,9 @@
+#Ignore everything in this directory.
+*
+#Except these particular files.
+!README.md
+!.gitignore
+#And patterns.
+!*.pdf
+!*.sty
+!*.tex
