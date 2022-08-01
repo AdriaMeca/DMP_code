@@ -1,6 +1,6 @@
 !> Procedures to create, modify and study arrays.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 01/08/22.
+!> Last modified date: 02/08/22.
 module array_procedures
   implicit none
 
@@ -23,29 +23,27 @@ module array_procedures
     module procedure add_dbl, add_int, add_int_list
   end interface add
 
+  interface argsort
+    module procedure dbl_argsort, int_argsort
+  end interface argsort
+
   interface find
     module procedure find_int
   end interface find
-
-  interface idx_insertion_sort
-    module procedure dbl_idx_insertion_sort, int_idx_insertion_sort
-  end interface idx_insertion_sort
 
   interface my_pack
     module procedure my_pack_int
   end interface my_pack
 
-  public :: add, find, idx_insertion_sort, my_pack, pop, quicksort
+  public :: add, argsort, find, my_pack, pop, quicksort
 
 contains
   !> Looks for the position of an integer in a list of integers.
   function find_int(list, element)
-    integer, intent(in) :: list(:)
-    integer, intent(in) :: element
-
+    integer, intent(in) :: list(:)   !>
+    integer, intent(in) :: element   !>
     integer             :: find_int  !> Output.
-
-    integer             :: i
+    integer             :: i         !>
 
     find_int = 0
     do i = 1, size(list)
@@ -57,60 +55,54 @@ contains
   end function find_int
 
 
-  !> Returns the indices that sort a list of doubles in ascending order.
-  function dbl_idx_insertion_sort(list)
-    double precision, intent(in) :: list(:)
+  !> Returns the indices that would sort a list of doubles in ascending order.
+  function dbl_argsort(list)
+    double precision, intent(in) :: list(:)                  !>
+    double precision             :: copy_list(size(list))    !>
+    integer                      :: dbl_argsort(size(list))  !> Output.
+    integer                      :: i, j                     !>
 
-    integer                      :: dbl_idx_insertion_sort(size(list))  !> Output.
-
-    double precision             :: copy_list(size(list))
-    integer                      :: i, j
-
+    !> Insertion sort algorithm.
     copy_list = list
-    dbl_idx_insertion_sort = [(i, i=1,size(list))]
+    dbl_argsort = [(i, i=1,size(list))]
     do i = 2, size(list)
       j = i
-      do while (copy_list(j) < copy_list(j-1))
+      do while ((j > 1) .and. (copy_list(j-1) > copy_list(j)))
         copy_list([j-1, j]) = copy_list([j, j-1])
-        dbl_idx_insertion_sort([j-1, j]) = dbl_idx_insertion_sort([j, j-1])
+        dbl_argsort([j-1, j]) = dbl_argsort([j, j-1])
         j = j - 1
-        if (j <= 1) exit
       end do
     end do
-  end function dbl_idx_insertion_sort
+  end function dbl_argsort
 
 
-  !> Returns the indices that sort a list of integers in ascending order.
-  function int_idx_insertion_sort(list)
-    integer, intent(in) :: list(:)
+  !> Returns the indices that would sort a list of integers in ascending order.
+  function int_argsort(list)
+    integer, intent(in) :: list(:)                  !>
+    integer             :: int_argsort(size(list))  !> Output.
+    integer             :: copy_list(size(list))    !>
+    integer             :: i, j                     !>
 
-    integer             :: int_idx_insertion_sort(size(list))  !> Output.
-
-    integer             :: copy_list(size(list))
-    integer             :: i, j
-
+    !> Insertion sort algorithm.
     copy_list = list
-    int_idx_insertion_sort = [(i, i=1,size(list))]
+    int_argsort = [(i, i=1,size(list))]
     do i = 2, size(list)
       j = i
-      do while (copy_list(j) < copy_list(j-1))
+      do while ((j > 1) .and. (copy_list(j-1) > copy_list(j)))
         copy_list([j-1, j]) = copy_list([j, j-1])
-        int_idx_insertion_sort([j-1, j]) = int_idx_insertion_sort([j, j-1])
+        int_argsort([j-1, j]) = int_argsort([j, j-1])
         j = j - 1
-        if (j <= 1) exit
       end do
     end do
-  end function int_idx_insertion_sort
+  end function int_argsort
 
 
   !> Returns a list without its i-th element.
   function pop(list, i)
-    double precision,              intent(in) :: list(:)
-    integer,                       intent(in) :: i
-
+    double precision,              intent(in) :: list(:)  !>
     double precision, allocatable             :: pop(:)   !> Output.
-
-    integer                                   :: n
+    integer,                       intent(in) :: i        !>
+    integer                                   :: n        !>
 
     n = size(list)
     if ((1 <= i) .and. (i <= n)) then
@@ -125,12 +117,10 @@ contains
 
   !> Adds a double to an array of doubles.
   subroutine add_dbl(list, element)
-    double precision,              intent(in)    :: element
-
-    double precision, allocatable, intent(inout) :: list(:)
-
-    double precision, allocatable                :: copy_list(:)
-    integer                                      :: isize
+    double precision,              intent(in)    :: element       !>
+    double precision, allocatable, intent(inout) :: list(:)       !>
+    double precision, allocatable                :: copy_list(:)  !>
+    integer                                      :: isize         !>
 
     if (allocated(list)) then
       !> We make a copy of the original list, adding the new element to it.
@@ -151,12 +141,10 @@ contains
 
   !> Adds an integer to an array of integers.
   subroutine add_int(list, element)
-    integer,              intent(in)    :: element
-
-    integer, allocatable, intent(inout) :: list(:)
-
-    integer, allocatable                :: copy_list(:)
-    integer                             :: isize
+    integer,              intent(in)    :: element       !>
+    integer, allocatable, intent(inout) :: list(:)       !>
+    integer, allocatable                :: copy_list(:)  !>
+    integer                             :: isize         !>
 
     if (allocated(list)) then
       !> We make a copy of the original list, adding the new element to it.
@@ -177,12 +165,10 @@ contains
 
   !> Adds a list of integers to a list of lists (of integers).
   subroutine add_int_list(list, element)
-    type(int_list),              intent(in)    :: element
-
-    type(int_list), allocatable, intent(inout) :: list(:)
-
-    integer                                    :: isize
-    type(int_list), allocatable                :: copy_list(:)
+    integer                                    :: isize         !>
+    type(int_list),              intent(in)    :: element       !>
+    type(int_list), allocatable, intent(inout) :: list(:)       !>
+    type(int_list), allocatable                :: copy_list(:)  !>
 
     if (allocated(list)) then
       !> We make a copy of the original list, adding the new element to it.
@@ -203,12 +189,10 @@ contains
 
   !> Custom version of GFortran's PACK function that applies to lists of integers.
   subroutine my_pack_int(list, condition)
-    logical,              intent(in)    :: condition(:)
-
-    integer, allocatable, intent(inout) :: list(:)
-
-    integer, allocatable                :: copy_list(:)
-    integer                             :: i, j, new_size, old_size
+    integer, allocatable, intent(inout) :: list(:)                   !>
+    integer, allocatable                :: copy_list(:)              !>
+    integer                             :: i, j, new_size, old_size  !>
+    logical,              intent(in)    :: condition(:)              !>
 
     if (.not. allocated(list)) then
       print *, 'An attempt was made to filter an unallocated list.'
@@ -222,7 +206,7 @@ contains
 
     !> The new size of the original list is equal to the number of elements that
     !> meet the condition.
-    new_size = count(condition == .true.)
+    new_size = count(condition)
     deallocate(list)
     allocate(list(new_size))
 
@@ -230,7 +214,7 @@ contains
     if (new_size > 0) then
       j = 1
       do i = 1, old_size
-        if (condition(i) == .true.) then
+        if (condition(i)) then
           list(j) = copy_list(i)
           j = j + 1
         end if
@@ -241,14 +225,13 @@ contains
 
   !> Sorts two lists by increasing value of the former.
   recursive subroutine quicksort(energies, node_ids)
-    double precision,              intent(inout) :: energies(:)
-    integer,                       intent(inout) :: node_ids(:)
-
-    double precision, allocatable                :: e_eq(:), e_gt(:), e_lt(:)
-    double precision, parameter                  :: eps = 1.0d-12
-    double precision                             :: e, pivot
-    integer,          allocatable                :: n_eq(:), n_gt(:), n_lt(:)
-    integer                                      :: i, isize, n
+    double precision,              intent(inout) :: energies(:)                !>
+    double precision, allocatable                :: e_eq(:), e_gt(:), e_lt(:)  !>
+    double precision, parameter                  :: eps = 1.0d-12              !>
+    double precision                             :: e, pivot                   !>
+    integer,                       intent(inout) :: node_ids(:)                !>
+    integer,          allocatable                :: n_eq(:), n_gt(:), n_lt(:)  !>
+    integer                                      :: i, isize, n                !>
 
     !> If the list of energies has less than two elements, it is already sorted.
     isize = size(energies)
