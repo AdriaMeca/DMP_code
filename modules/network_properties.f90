@@ -1,46 +1,30 @@
-!Module whose procedures study the properties of networks.
-!Author: Adria Meca Montserrat.
-!Last modified date: 05/06/22.
+!> Procedures for studying the properties of networks.
+!> Author: Adria Meca Montserrat.
+!> Last modified date: 03/08/22.
 module network_properties
-  use network_generation, only : node
+  use network_generation, only: node
 
   implicit none
 
   private
 
-  public average_degree, draw_network, number_of_edges
+  public :: average_degree, draw_network, number_of_edges
 
 contains
-  !Function that calculates the average degree of a network.
+  !> Calculates the average degree of a network.
   function average_degree(network)
-    implicit none
-
-    !Input arguments.
-    type(node), dimension(:), intent(in) :: network
-
-    !Output arguments.
-    double precision :: average_degree
-
+    double precision             :: average_degree  !> Output.
+    type(node),       intent(in) :: network(:)      !>
 
     average_degree = connection_points(network) / dble(size(network))
   end function average_degree
 
 
-
-  !Function that calculates the total number of connection points of a network.
-  !In other words, it computes the sum over the degree of each node in a graph.
+  !> Calculates the sum of the degrees of all nodes in a network.
   function connection_points(network)
-    implicit none
-
-    !Input arguments.
-    type(node), dimension(:), intent(in) :: network
-
-    !Output arguments.
-    integer :: connection_points
-
-    !Local variables.
-    integer :: i
-
+    integer                :: connection_points  !> Output.
+    integer                :: i                  !>
+    type(node), intent(in) :: network(:)         !>
 
     connection_points = 0
     do i = 1, size(network)
@@ -49,52 +33,37 @@ contains
   end function connection_points
 
 
-
-  !Function that calculates the number of edges of a network.
+  !> Calculates the number of edges in a network.
   function number_of_edges(network)
-    implicit none
-
-    !Input arguments.
-    type(node), dimension(:), intent(in) :: network
-
-    !Output arguments.
-    integer :: number_of_edges
-
+    integer                :: number_of_edges  !> Output.
+    type(node), intent(in) :: network(:)       !>
 
     number_of_edges = connection_points(network) / 2
   end function number_of_edges
 
 
-
-  !Subroutine that writes the information needed for Gnuplot to draw a network.
+  !> Returns the information that Gnuplot needs to draw a network.
   subroutine draw_network(network, r)
-    implicit none
+    double precision, intent(in) :: r(:, :)             !> Node positions.
+    integer                      :: i, isize, k, ki, N  !>
+    type(node),       intent(in) :: network(:)          !>
 
-    !Input arguments.
-    double precision, dimension(:, :), intent(in) :: r
-
-    type(node), dimension(:), intent(in) :: network
-
-    !Local variables.
-    integer :: i, isize, k, ki, N
-
-
-    !Number of nodes.
+    !> Number of nodes.
     N = size(network)
 
-    !First, we write the positions of the nodes.
+    !> We write the positions of the nodes.
     do i = 1, N
       write(*, '(2es26.16)') r(i, :)
     end do
     write(*, '(a)') achar(10)
 
-    !In order for Gnuplot to draw a vector between nodes i and k, we have to
-    !write (xi, yi) and (xk-xi, yk-yi).
+    !> Writing (xi, yi) and (xk-xi, yk-yi) allows Gnuplot to draw a vector between
+    !> nodes i and k.
     do i = 1, N
       isize = size(network(i)%neighbors)
       do ki = 1, isize
         k = network(i)%neighbors(ki)
-        write(*, '(4es26.16)') r(i, :), r(k, :)-r(i, :)
+        write(*, '(4es26.16)') r(i, :), r(k, :) - r(i, :)
       end do
     end do
     write(*, '(a)') achar(10)
