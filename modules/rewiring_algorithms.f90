@@ -42,8 +42,8 @@ contains
     end do
 
     !> We rewire links.
-    do t = 1, t0
-      if ((t > 1) .and. (Q > 0.0d0)) then
+    do t = 0, t0
+      if ((t > 0) .and. (Q > 0.0d0)) then
         select case (trim(model))
           case ('PN')
             call loc_rewiring(network, N, c, l, Q, r)
@@ -77,7 +77,7 @@ contains
         end do
 
         !> We save the active links of node i at time t.
-        call add(indices(i)%time, locations)
+        call add(indices(i)%time, locations, 0)
 
         deallocate(locations%array)
       end do
