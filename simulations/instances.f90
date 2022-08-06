@@ -12,7 +12,7 @@ program instances
 
   implicit none
 
-  character(len=1), allocatable :: states(:)                                              !>
+  character(len=1), allocatable :: states(:, :)                                           !>
   character(len=9)              :: graph, model, param, scale                             !>
   double precision, allocatable :: r(:, :)                                                !>
   double precision              :: a, alpha, b, l, lambda, mu, nu, point, Q, rank         !>
@@ -36,7 +36,7 @@ program instances
   allocate(r(N, 2))
 
   allocate(history(N), indices(N), network(N), origins(seeds), ranks(seeds), &
-    states(N))
+    states(0:t0, N))
 
   !> We initialize the random number generator.
   if (rng) then

@@ -1,6 +1,6 @@
 !> Procedures that rewire the links in a network over time.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 04/08/22.
+!> Last modified date: 06/08/22.
 module rewiring_algorithms
   use array_procedures, only: add, find, int_list, int_llist, my_pack
   use network_generation, only: node
@@ -91,9 +91,9 @@ contains
     double precision, intent(in)    :: Q                                      !> Rewiring probability.
     double precision, intent(in)    :: r(:, :)                                !> Node positions.
     double precision                :: A, cum, dij, pij, rng, side, xij, yij  !>
-    double precision                :: B(N)                                   !> Upper bounds of the towers.
     integer,          intent(in)    :: c                                      !> Parameter that controls connectivity.
     integer,          intent(in)    :: N                                      !> Number of nodes.
+    double precision                :: B(N)                                   !> Upper bounds of the towers.
     integer                         :: i, idx, j, k, ksize, m                 !>
     type(node),       intent(inout) :: network(:)                             !> Original network.
 

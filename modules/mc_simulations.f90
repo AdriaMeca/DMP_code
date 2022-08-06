@@ -1,6 +1,6 @@
 !> Procedures that simulate the spread of epidemics on time-varying networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 05/08/22.
+!> Last modified date: 06/08/22.
 module mc_simulations
   use array_procedures, only: int_llist
   use network_generation, only: node
@@ -30,8 +30,6 @@ contains
   )
     character(len=*),              intent(in)  :: model                      !> Epidemiological model.
     character(len=1),              intent(out) :: tmp_states(0:, :)          !> Node states.
-    character(len=1)                           :: auxsts(size(history))      !>
-    character(len=1)                           :: states(size(history))      !>
     double precision,              intent(in)  :: alpha_, lambda_, mu_, nu_  !>
     double precision,              intent(out) :: tmp_mc_probs(:, :)         !> Temporal MC probabilities.
     double precision                           :: alpha, lambda, mu, nu      !> Epidemiological parameters.
@@ -43,6 +41,8 @@ contains
     integer                                    :: alti, i, isize, N, t       !>
     type(int_llist),               intent(in)  :: indices(:)                 !> Active links throughout the simulation.
     type(node),                    intent(in)  :: history(:)                 !> Rewiring history.
+    character(len=1)                           :: auxsts(size(history))      !>
+    character(len=1)                           :: states(size(history))      !>
 
     !> Number of nodes.
     N = size(history)

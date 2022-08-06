@@ -1,7 +1,7 @@
 !> Contains the dynamic message-passing (DMP) algorithm for the S(E)IR model on
 !> time-varying networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 05/08/22.
+!> Last modified date: 06/08/22.
 module dmp_algorithms
   use array_procedures, only: dbl_list, int_llist, my_pack, pop
   use network_generation, only: node
@@ -38,20 +38,20 @@ contains
     double precision,              intent(out) :: tmp_dmp_probs(:, :)                                  !> DMP trajectories.
     character(len=1),              intent(in)  :: states(:)                                            !> Node states.
     double precision                           :: alpha, lambda, mu, nu                                !> Epidemiological parameters.
-    double precision                           :: ps0(size(history))                                   !>
     double precision                           :: theta_ki, xi                                         !>
     integer,                       intent(in)  :: origins(:)                                           !> Patient zeros.
     integer,                       intent(in)  :: t0                                                   !> Observation time.
     integer,          allocatable              :: non_susceptible(:)                                   !>
     integer                                    :: alti, altk, gsize, hsize, i, ik, isize, k, ki, N, t  !>
     logical,                       intent(in)  :: restricted                                           !>
+    type(int_llist),               intent(in)  :: indices(:)                                           !> Active links throughout the simulation.
+    type(node),                    intent(in)  :: history(:)                                           !> Rewiring history.
     type(dbl_list)                             :: nps(size(history))                                   !>
     type(dbl_list)                             :: ops(size(history))                                   !>
+    double precision                           :: ps0(size(history))                                   !>
     type(dbl_list)                             :: phi(size(history))                                   !>
     type(dbl_list)                             :: psi(size(history))                                   !>
     type(dbl_list)                             :: theta(size(history))                                 !>
-    type(int_llist),               intent(in)  :: indices(:)                                           !> Active links throughout the simulation.
-    type(node),                    intent(in)  :: history(:)                                           !> Rewiring history.
 
     !> Number of nodes.
     N = size(history)

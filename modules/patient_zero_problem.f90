@@ -1,6 +1,6 @@
 !> Procedures that simulate the patient-zero problem.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 05/08/22.
+!> Last modified date: 06/08/22.
 module patient_zero_problem
   use array_procedures, only: add, find, int_llist, my_pack, quicksort
   use dmp_algorithms, only: dmp
@@ -37,18 +37,14 @@ contains
     t0               &
   )
     character(len=*),              intent(in)  :: model                                      !> Epidemiological model.
-    character(len=1),              intent(out) :: states(:)                                  !> Node states.
+    character(len=1),              intent(out) :: states(0:, :)                              !> Node states.
     double precision,              intent(in)  :: alpha, lambda, mu, nu                      !> Epidemiological parameters.
     double precision, allocatable              :: energies(:)                                !> Node energies.
     double precision, parameter                :: small = 1.0d-300                           !>
     double precision                           :: joint                                      !>
-    double precision                           :: pe(size(history))                          !>
-    double precision                           :: pi(size(history))                          !>
-    double precision                           :: pr(size(history))                          !>
-    double precision                           :: ps(size(history))                          !>
-    double precision                           :: tmp_dmp_probs(t0, 4), tmp_mc_probs(t0, 4)  !>
     integer,                       intent(in)  :: seeds                                      !> Number of patient zeros.
     integer,                       intent(in)  :: t0                                         !> Observation time.
+    double precision                           :: tmp_dmp_probs(t0, 4), tmp_mc_probs(t0, 4)  !>
     integer,                       intent(out) :: gsize(:), origins(:), ranks(:)             !>
     integer,          allocatable              :: non_susceptible(:)                         !>
     integer                                    :: counter, i, idx, N, node_i, total          !>
@@ -56,6 +52,10 @@ contains
     logical,                       intent(in)  :: dmpr                                       !>
     type(int_llist),               intent(in)  :: indices(:)                                 !> Active links throughout the simulation.
     type(node),                    intent(in)  :: history(:)                                 !> Rewiring history.
+    double precision                           :: pe(size(history))                          !>
+    double precision                           :: pi(size(history))                          !>
+    double precision                           :: pr(size(history))                          !>
+    double precision                           :: ps(size(history))                          !>
 
     !> Number of nodes.
     N = size(history)
@@ -82,14 +82,14 @@ contains
       )
 
       !> If the epidemic spread, we exit the loop.
-      if (count(states /= 'S') > 1) exit
+      if (count(states(t0, :) /= 'S') > 1) exit
     end do
 
     !> Only non-susceptible nodes may have started the epidemic.
     gsize = 0
     counter = 0
     do i = 1, N
-      select case (states(i))
+      select case (states(t0, i))
         case ('S')
           cycle
         case ('E')
@@ -114,7 +114,7 @@ contains
         dmpr,          &
         history,       &
         indices,       &
-        states,        &
+        states(t0, :), &
         [node_i],      &
         alpha,         &
         lambda,        &
@@ -125,7 +125,7 @@ contains
         pe,            &
         pi,            &
         pr,            &
-        tmp_dmp_probs, &
+        tmp_dmp_probs  &
       )
 
       !> The probability that node i is the patient zero given the observation
@@ -135,7 +135,7 @@ contains
       total = 0
       joint = 1.0d0
       do i = 1, N
-        select case (states(i))
+        select case (states(t0, i))
           case ('S')
             joint = joint * ps(i)
           case ('E')
