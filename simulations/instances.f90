@@ -36,7 +36,7 @@ program instances
   allocate(r(N, 2))
 
   allocate(history(N), indices(N), network(N), origins(seeds), ranks(seeds), &
-    states(0:t0, N))
+    states(0:t0+1, N))
 
   !> We initialize the random number generator.
   if (rng) then

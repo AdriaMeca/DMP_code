@@ -26,7 +26,7 @@ contains
     indices,         &
     seeds,           &
     states,          &
-    origins,         &
+    patient_zeros,   &
     ranks,           &
     guess,           &
     gsize,           &
@@ -36,49 +36,47 @@ contains
     nu,              &
     t0               &
   )
-    character(len=*),              intent(in)  :: model                                      !> Epidemiological model.
-    character(len=1),              intent(out) :: states(0:, :)                              !> Node states.
-    double precision,              intent(in)  :: alpha, lambda, mu, nu                      !> Epidemiological parameters.
-    double precision, allocatable              :: energies(:)                                !> Node energies.
-    double precision, parameter                :: small = 1.0d-300                           !>
-    double precision                           :: joint                                      !>
-    integer,                       intent(in)  :: seeds                                      !> Number of patient zeros.
-    integer,                       intent(in)  :: t0                                         !> Observation time.
-    double precision                           :: tmp_dmp_probs(t0, 4), tmp_mc_probs(t0, 4)  !>
-    integer,                       intent(out) :: gsize(:), origins(:), ranks(:)             !>
-    integer,          allocatable              :: non_susceptible(:)                         !>
-    integer                                    :: counter, i, idx, N, node_i, total          !>
-    integer                                    :: guess                                      !> Predicted patient zero.
-    logical,                       intent(in)  :: dmpr                                       !>
-    type(int_llist),               intent(in)  :: indices(:)                                 !> Active links throughout the simulation.
-    type(node),                    intent(in)  :: history(:)                                 !> Rewiring history.
-    double precision                           :: pe(size(history))                          !>
-    double precision                           :: pi(size(history))                          !>
-    double precision                           :: pr(size(history))                          !>
-    double precision                           :: ps(size(history))                          !>
+    character(len=*),              intent(in)  :: model                                 !> Epidemiological model.
+    character(len=1),              intent(out) :: states(0:, :)                         !> Node states.
+    double precision,              intent(in)  :: alpha, lambda, mu, nu                 !> Epidemiological parameters.
+    double precision, allocatable              :: energies(:)                           !> Node energies.
+    double precision, parameter                :: small = 1.0d-300                      !>
+    double precision                           :: joint                                 !>
+    integer,                       intent(in)  :: seeds                                 !> Number of patient zeros.
+    integer,                       intent(in)  :: t0                                    !> Observation time.
+    double precision                           :: tmp_dmp_probs(t0, 4)                  !>
+    integer,                       intent(out) :: gsize(:), patient_zeros(:), ranks(:)  !>
+    integer,          allocatable              :: non_susceptible(:)                    !>
+    integer                                    :: counter, i, idx, N, node_i, total     !>
+    integer                                    :: guess                                 !> Predicted patient zero.
+    logical,                       intent(in)  :: dmpr                                  !>
+    type(int_llist),               intent(in)  :: indices(:)                            !> Active links throughout the simulation.
+    type(node),                    intent(in)  :: history(:)                            !> Rewiring history.
+    double precision                           :: pe(size(history))                     !>
+    double precision                           :: pi(size(history))                     !>
+    double precision                           :: pr(size(history))                     !>
+    double precision                           :: ps(size(history))                     !>
 
     !> Number of nodes.
     N = size(history)
 
     !> We neglect those instances where the epidemic does not spread.
     do while (.true.)
-      !> We choose the origins at random.
-      origins = [(1 + mod(int(N*r1279()), N), i=1,seeds)]
+      !> We choose the patient zeros at random.
+      patient_zeros = [(1 + mod(int(N*r1279()), N), i=1,seeds)]
 
       !> We let the system evolve by simulating the S(E)IR rules with MC up to t0.
-      call mc_sim(   &
-        model,       &
-        history,     &
-        indices,     &
-        origins,     &
-        alpha,       &
-        lambda,      &
-        mu,          &
-        nu,          &
-        t0,          &
-        states,      &
-        1,           &
-        tmp_mc_probs &
+      call mc_sim(     &
+        model,         &
+        history,       &
+        indices,       &
+        patient_zeros, &
+        alpha,         &
+        lambda,        &
+        mu,            &
+        nu,            &
+        t0,            &
+        states         &
       )
 
       !> If the epidemic spread, we exit the loop.
@@ -170,7 +168,7 @@ contains
     call quicksort(energies, non_susceptible)
 
     !> We compute the ranks of the true patient zeros.
-    ranks = [(find(non_susceptible, origins(i)) - 1, i=1,seeds)]
+    ranks = [(find(non_susceptible, patient_zeros(i)) - 1, i=1,seeds)]
 
     !> We return the node that the algorithm believes to be the true patient zero.
     guess = non_susceptible(1)
