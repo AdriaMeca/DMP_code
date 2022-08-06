@@ -44,7 +44,6 @@ contains
     double precision                           :: joint                                 !>
     integer,                       intent(in)  :: seeds                                 !> Number of patient zeros.
     integer,                       intent(in)  :: t0                                    !> Observation time.
-    double precision                           :: tmp_dmp_probs(t0, 4)                  !>
     integer,                       intent(out) :: gsize(:), patient_zeros(:), ranks(:)  !>
     integer,          allocatable              :: non_susceptible(:)                    !>
     integer                                    :: counter, i, idx, N, node_i, total     !>
@@ -52,10 +51,7 @@ contains
     logical,                       intent(in)  :: dmpr                                  !>
     type(int_llist),               intent(in)  :: indices(:)                            !> Active links throughout the simulation.
     type(node),                    intent(in)  :: history(:)                            !> Rewiring history.
-    double precision                           :: pe(size(history))                     !>
-    double precision                           :: pi(size(history))                     !>
-    double precision                           :: pr(size(history))                     !>
-    double precision                           :: ps(size(history))                     !>
+    double precision                           :: p(4, 0:t0, size(history))             !>
 
     !> Number of nodes.
     N = size(history)
@@ -107,23 +103,18 @@ contains
 
       !> We calculate the DMP(r) marginal probabilities that each node is in state
       !> X (i.e., S, E, I or R) at t0 given that node i is the patient zero.
-      call dmp(        &
-        model,         &
-        dmpr,          &
-        history,       &
-        indices,       &
-        states(t0, :), &
-        [node_i],      &
-        alpha,         &
-        lambda,        &
-        mu,            &
-        nu,            &
-        t0,            &
-        ps,            &
-        pe,            &
-        pi,            &
-        pr,            &
-        tmp_dmp_probs  &
+      call dmp(       &
+        model,        &
+        history,      &
+        indices,      &
+        [(i, i=1,N)], &
+        [node_i],     &
+        alpha,        &
+        lambda,       &
+        mu,           &
+        nu,           &
+        t0,           &
+        p             &
       )
 
       !> The probability that node i is the patient zero given the observation
@@ -135,13 +126,13 @@ contains
       do i = 1, N
         select case (states(t0, i))
           case ('S')
-            joint = joint * ps(i)
+            joint = joint * p(1, t0, i)
           case ('E')
-            joint = joint * pe(i)
+            joint = joint * p(2, t0, i)
           case ('I')
-            joint = joint * pi(i)
+            joint = joint * p(3, t0, i)
           case ('R')
-            joint = joint * pr(i)
+            joint = joint * p(4, t0, i)
         end select
 
         !> It may happen that 'joint' becomes so small that GFortran converts its
