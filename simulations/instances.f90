@@ -12,16 +12,16 @@ program instances
 
   implicit none
 
-  character(len=1), allocatable :: states(:, :)                                           !>
-  character(len=9)              :: graph, model, param, scale                             !>
-  double precision, allocatable :: r(:, :)                                                !>
-  double precision              :: a, alpha, b, l, lambda, mu, nu, point, Q, rank         !>
-  integer,          allocatable :: origins(:), ranks(:)                                   !>
-  integer                       :: c, guess, i, idx, ins, iseed, N, p, points, seeds, t0  !>
-  integer                       :: gsize(3), values(8)                                    !>
-  logical                       :: dmpr, rng                                              !>
-  type(int_llist),  allocatable :: indices(:)                                             !>
-  type(node),       allocatable :: history(:), network(:)                                 !>
+  character(len=1), allocatable :: states(:, :)                                        !>
+  character(len=9)              :: graph, model, param, scale                          !>
+  double precision, allocatable :: r(:, :)                                             !>
+  double precision              :: a, alpha, b, l, lambda, mu, nu, Q, rank             !>
+  integer,          allocatable :: patient_zeros(:), ranks(:)                          !>
+  integer                       :: c, guess, i, idx, ins, iseed, N, points, seeds, t0  !>
+  integer                       :: gsize(3), values(8)                                 !>
+  logical                       :: dmpr, rng                                           !>
+  type(int_llist),  allocatable :: indices(:)                                          !>
+  type(node),       allocatable :: history(:), network(:)                              !>
 
   !> Parameters.
   open(unit=10, file='instances.txt')
@@ -35,7 +35,7 @@ program instances
 
   allocate(r(N, 2))
 
-  allocate(history(N), indices(N), network(N), origins(seeds), ranks(seeds), &
+  allocate(history(N), indices(N), network(N), patient_zeros(seeds), ranks(seeds), &
     states(0:t0+1, N))
 
   !> We initialize the random number generator.
@@ -51,67 +51,40 @@ program instances
   !> Initialization of the node positions.
   r = sqrt(dble(N)) * reshape([(r1279(), i=1,2*N)], [N, 2])
 
-  do p = 1, points
-    !> We restart the random sequence.
-    call setr1279(ir1279())
-
-    !> The chosen parameter will vary differently depending on the selected scale.
-    if (points > 1) then
-      select case (trim(scale))
-        case ('log')
-          point = exp(log(a) + log(b/a)*(p-1)/(points-1))
-        case default
-          point = a + (b-a)*(p-1)/(points-1)
-      end select
-    else
-      point = lambda
-    end if
-
-    !> We modify the chosen parameter.
-    select case (trim(param))
-      case ('l')
-        l = point
-      case ('lambda')
-        lambda = point
-      case ('t0')
-        t0 = int(point)
+  do idx = 1, ins
+    !> We create a network of the chosen type.
+    select case (trim(graph))
+      case ('PN')
+        network = PN(N, c, r, l)
+      case ('RRG')
+        network = RRG(N, c)
     end select
 
-    do idx = 1, ins
-      !> We create a network of the chosen type.
-      select case (trim(graph))
-        case ('PN')
-          network = PN(N, c, r, l)
-        case ('RRG')
-          network = RRG(N, c)
-      end select
+    !> We rewire the network links.
+    call rewiring(graph, network, history, indices, l, Q, r, c, t0)
 
-      !> We rewire the network links.
-      call rewiring(graph, network, history, indices, l, Q, r, c, t0)
+    !> We compute the ranks of the seeds and the size of the epidemic.
+    call pz_sim(     &
+      model,         &
+      dmpr,          &
+      history,       &
+      indices,       &
+      seeds,         &
+      states,        &
+      patient_zeros, &
+      ranks,         &
+      guess,         &
+      gsize,         &
+      alpha,         &
+      lambda,        &
+      mu,            &
+      nu,            &
+      t0             &
+    )
 
-      !> We compute the ranks of the seeds and the size of the epidemic.
-      call pz_sim( &
-        model,     &
-        dmpr,      &
-        history,   &
-        indices,   &
-        seeds,     &
-        states,    &
-        origins,   &
-        ranks,     &
-        guess,     &
-        gsize,     &
-        alpha,     &
-        lambda,    &
-        mu,        &
-        nu,        &
-        t0         &
-      )
+    !> We use the average of the rank of the seeds as a measure of performance.
+    rank = sum(ranks) / dble(seeds)
 
-      !> We use the average of the rank of the seeds as a measure of performance.
-      rank = sum(ranks) / dble(seeds)
-
-      write(*, '(2es26.16,2i26)') point, rank, gsize(2:3)
-    end do
+    write(*, '(2es26.16,2i26)') lambda, rank, gsize(2:3)
   end do
 end program instances
