@@ -1,17 +1,15 @@
-!> Procedures that generate networks.
+!> Procedures that generate networks of different types.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/08/22.
+!> Last modified date: 12/08/22.
 module network_generation
-  use array_procedures, only: add, my_pack
+  use array_procedures,        only: add, my_pack
+  use derived_types,           only: node
+  use network_properties,      only: internode_distance
   use random_number_generator, only: r1279
 
   implicit none
 
   private
-
-  type, public :: node
-    integer, allocatable :: neighbors(:), opposites(:)
-  end type node
 
   public :: PN, RRG
 
@@ -19,29 +17,22 @@ contains
   !> Generates a Proximity Network (PN) whose links are established based on the
   !> distance between nodes.
   function PN(N, c, r, l)
-    double precision, intent(in) :: l                            !> Larger values of l allow longer link formation.
-    double precision, intent(in) :: r(:, :)                      !> Node positions.
-    double precision             :: A, dij, pij, side, xij, yij  !>
-    integer,          intent(in) :: c                            !> Parameter that controls connectivity.
-    integer,          intent(in) :: N                            !> Number of nodes.
-    integer                      :: i, j                         !>
-    type(node)                   :: PN(N)                        !> Output.
-
-    !> Side of the two-dimensional box where the nodes are confined.
-    side = sqrt(dble(N))
+    integer,          intent(in) :: c            !> Parameter that controls connectivity.
+    integer,          intent(in) :: N            !> Number of nodes.
+    integer                      :: i, j         !>
+    double precision, intent(in) :: l            !> Larger values of l allow longer link formation.
+    double precision, intent(in) :: r(:, :)      !> Node positions.
+    double precision             :: A, dij, pij  !>
+    type(node)                   :: PN(N)        !> Output.
 
     !> We calculate the normalization constant A.
     A = 0.0d0
     do i = 1, N
-      !> We initialize the list of neighbors.
       allocate(PN(i)%neighbors(0))
-      do j = i+1, N
-        !> Periodic Boundary Conditions (PBC).
-        xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
-        yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
 
+      do j = i+1, N
         !> Distance between nodes i and j.
-        dij = sqrt(xij*xij + yij*yij)
+        dij = internode_distance(r, i, j, pbc=.true.)
 
         !> We update A.
         A = A + exp(-dij/l)
@@ -53,10 +44,8 @@ contains
 
     do i = 1, N
       do j = i+1, N
-        !> PBC.
-        xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
-        yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
-        dij = sqrt(xij*xij + yij*yij)
+        !> Distance between nodes i and j.
+        dij = internode_distance(r, i, j, pbc=.true.)
 
         !> We decide whether i and j are connected or not.
         if (r1279() < pij*exp(-dij/l)) then
@@ -84,6 +73,7 @@ contains
       !> Step 1: we initialize the network and the arrays.
       do idx_i = 1, N
         allocate(RRG(idx_i)%neighbors(0))
+
         do idx_j = 1, c
           idx_k = idx_j + (idx_i-1)*c
 

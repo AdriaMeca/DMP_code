@@ -1,9 +1,10 @@
 !> Procedures that rewire the links in a network over time.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 06/08/22.
+!> Last modified date: 12/08/22.
 module rewiring_algorithms
-  use array_procedures, only: add, find, int_list, int_llist, my_pack
-  use network_generation, only: node
+  use array_procedures,        only: add, find, my_pack
+  use derived_types,           only: int_list, int_llist, node
+  use network_properties,      only: internode_distance
   use random_number_generator, only: r1279
 
   implicit none
@@ -15,36 +16,36 @@ module rewiring_algorithms
 contains
   !> Records the link changes a network experiences over time and keeps track of
   !> its active connections at each time step.
-  subroutine rewiring(model, network, history, indices, l, Q, r, c, t0)
-    character(len=*), intent(in)    :: model                        !> Network type.
-    double precision, intent(in)    :: l                            !> Parameter that controls locality.
-    double precision, intent(in)    :: Q                            !> Rewiring probability.
-    double precision, intent(in)    :: r(:, :)                      !> Node positions.
-    integer,          intent(in)    :: c                            !> Parameter that controls connectivity.
-    integer,          intent(in)    :: t0                           !> Observation time.
-    integer                         :: altk, i, isize, k, ki, N, t  !>
-    type(int_list)                  :: locations                    !> Active links of node i at time t.
-    type(int_llist),  intent(inout) :: indices(:)                   !> Active links throughout the simulation.
-    type(node),       intent(inout) :: history(:)                   !> Rewiring history.
-    type(node),       intent(inout) :: network(:)                   !> Original network.
+  subroutine rewiring(graph, network, history, indices, l, Q, r, c, t0)
+    integer,          intent(in)    :: c                     !> Parameter that controls connectivity.
+    integer,          intent(in)    :: t0                    !> Observation time.
+    integer                         :: altk, i, k, ki, N, t  !>
+    character(len=*), intent(in)    :: graph                 !> Network type.
+    double precision, intent(in)    :: l                     !> Parameter that controls locality.
+    double precision, intent(in)    :: Q                     !> Rewiring probability.
+    double precision, intent(in)    :: r(:, :)               !> Node positions.
+    type(int_list)                  :: locations             !> Active links of node i at time t.
+    type(int_llist),  intent(inout) :: indices(:)            !> Active links throughout the simulation.
+    type(node),       intent(inout) :: history(:)            !> Rewiring history.
+    type(node),       intent(inout) :: network(:)            !> Original network.
 
     !> Number of nodes.
     N = size(network)
 
-    !> We initialize the rewiring history.
+    !> We remove the information from a hypothetical previous iteration.
     do i = 1, N
-      !> We remove the information from a hypothetical previous iteration.
       if (allocated(history(i)%neighbors)) deallocate(history(i)%neighbors)
       if (allocated(history(i)%opposites)) deallocate(history(i)%opposites)
       if (allocated(indices(i)%time)) deallocate(indices(i)%time)
 
-      allocate(history(i)%neighbors(0), history(i)%opposites(0))
+      allocate(history(i)%neighbors(0))
+      allocate(history(i)%opposites(0))
     end do
 
-    !> We rewire links.
     do t = 0, t0
+      !> We rewire links.
       if ((t > 0) .and. (Q > 0.0d0)) then
-        select case (trim(model))
+        select case (trim(graph))
           case ('PN')
             call loc_rewiring(network, N, c, l, Q, r)
           case ('RRG')
@@ -58,11 +59,10 @@ contains
       do i = 1, N
         allocate(locations%array(0))
 
-        isize = size(network(i)%neighbors)
-        do altk = 1, isize
+        !> We record every link that node i has had up to time t.
+        do altk = 1, size(network(i)%neighbors)
           k = network(i)%neighbors(altk)
 
-          !> We record every connection made throughout the simulation.
           ki = find(history(i)%neighbors, k)
           if (ki == 0) then
             call add(history(i)%neighbors, k)
@@ -87,29 +87,22 @@ contains
 
   !> Rewires links in a network based on their length to preserve locality.
   subroutine loc_rewiring(network, N, c, l, Q, r)
-    double precision, intent(in)    :: l                                      !> Parameter that controls locality.
-    double precision, intent(in)    :: Q                                      !> Rewiring probability.
-    double precision, intent(in)    :: r(:, :)                                !> Node positions.
-    double precision                :: A, cum, dij, pij, rng, side, xij, yij  !>
-    integer,          intent(in)    :: c                                      !> Parameter that controls connectivity.
-    integer,          intent(in)    :: N                                      !> Number of nodes.
-    double precision                :: B(N)                                   !> Upper bounds of the towers.
-    integer                         :: i, idx, j, k, ksize, m                 !>
-    type(node),       intent(inout) :: network(:)                             !> Original network.
-
-    !> Side of the two-dimensional box where the nodes are confined.
-    side = sqrt(dble(N))
+    integer,          intent(in)    :: c                       !> Parameter that controls connectivity.
+    integer,          intent(in)    :: N                       !> Number of nodes.
+    integer                         :: i, idx, j, k, ksize, m  !>
+    double precision, intent(in)    :: l                       !> Parameter that controls locality.
+    double precision, intent(in)    :: Q                       !> Rewiring probability.
+    double precision, intent(in)    :: r(:, :)                 !> Node positions.
+    double precision                :: A, cum, dij, pij, rng   !>
+    double precision                :: B(N)                    !> Upper bounds of the towers.
+    type(node),       intent(inout) :: network(:)              !> Original network.
 
     !> We calculate the normalization constant A.
     A = 0.0d0
     do i = 1, N
       do j = i+1, N
-        !> Periodic Boundary Conditions (PBC).
-        xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
-        yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
-
         !> Distance between nodes i and j.
-        dij = sqrt(xij*xij + yij*yij)
+        dij = internode_distance(r, i, j, pbc=.true.)
 
         !> We update A.
         A = A + exp(-dij/l)
@@ -125,10 +118,8 @@ contains
       do j = 1, N
         if (i == j) cycle
 
-        !> We apply PBC and calculate the distance between nodes i and j.
-        xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
-        yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
-        dij = sqrt(xij*xij + yij*yij)
+        !> Distance between nodes i and j.
+        dij = internode_distance(r, i, j, pbc=.true.)
 
         !> We update B(i).
         B(i) = B(i) + pij*exp(-dij/l)
@@ -147,10 +138,8 @@ contains
           do j = 1, N
             if (i == j) cycle
 
-            !> We apply PBC and calculate the distance between nodes i and j.
-            xij = min(abs(r(j, 1)-r(i, 1)), side-abs(r(j, 1)-r(i, 1)))
-            yij = min(abs(r(j, 2)-r(i, 2)), side-abs(r(j, 2)-r(i, 2)))
-            dij = sqrt(xij*xij + yij*yij)
+            !> Distance between nodes i and j.
+            dij = internode_distance(r, i, j, pbc=.true.)
 
             !> We update the cumulative probability.
             cum = cum + pij*exp(-dij/l)
@@ -158,14 +147,12 @@ contains
             !> We have found j if 'rng' is less than the cumulative probability.
             if (rng < cum) exit
           end do
+
           !> We make sure that j is always less than N.
           j = merge(N, j, j>N)
 
-          !> Temporary.
-          if (i == j) print *, 'Ups!'
-
-          !> If i and j are disconnected, we proceed.
-          if (all(network(i)%neighbors /= j)) then
+          !> If i and j are different and disconnected, we proceed.
+          if ((i /= j) .and. all(network(i)%neighbors /= j)) then
             !> We choose a node k uniformly at random.
             k = 1 + mod(int(N*r1279()), N)
 
@@ -193,10 +180,10 @@ contains
 
   !> Rewires the links in a network while preserving its degree distribution.
   subroutine std_rewiring(network, N, c, Q)
-    double precision, intent(in)    :: Q                              !> Rewiring probability.
     integer,          intent(in)    :: c                              !> Parameter that controls connectivity.
     integer,          intent(in)    :: N                              !> Number of nodes.
     integer                         :: i, idx, isize, j, k, ksize, m  !>
+    double precision, intent(in)    :: Q                              !> Rewiring probability.
     type(node),       intent(inout) :: network(:)                     !> Original network.
 
     do idx = 1, N*c/4
@@ -240,10 +227,10 @@ contains
 
   !> Uniformly rewires the links in a network.
   subroutine uni_rewiring(network, N, c, Q)
-    double precision, intent(in)    :: Q                       !> Rewiring probability.
     integer,          intent(in)    :: c                       !> Parameter that controls connectivity.
     integer,          intent(in)    :: N                       !> Number of nodes.
     integer                         :: i, idx, j, jsize, k, m  !>
+    double precision, intent(in)    :: Q                       !> Rewiring probability.
     type(node),       intent(inout) :: network(:)              !> Original network.
 
     do idx = 1, N*c/4

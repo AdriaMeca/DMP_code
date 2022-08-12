@@ -1,149 +1,152 @@
-!> Contains the dynamic message-passing (DMP) algorithm for the S(E)IR model on
-!> time-varying networks.
+!> Procedures for computing the marginal probabilities that each node in a time-
+!> varying network is in states S, E, I or R at a given time t.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 06/08/22.
+!> Last modified date: 12/08/22.
 module dmp_algorithms
-  use array_procedures, only: dbl_list, int_llist, my_pack, pop
-  use network_generation, only: node
+  use array_procedures, only: my_pack, pop
+  use derived_types,    only: dbl_list, int_llist, node, prm
 
   implicit none
 
   private
 
-  public :: dmp
+  public :: dmp_alg
 
 contains
-  !> DMP(r) algorithm for the S(E)IR model.
-  subroutine dmp(  &
-    model,         &
-    history,       &
-    indices,       &
-    nodes,         &
-    patient_zeros, &
-    alpha_,        &
-    lambda_,       &
-    mu_,           &
-    nu_,           &
-    t0,            &
-    p              &
+  !> Uses the DMP algorithm to compute the marginal probabilities that each node
+  !> in a time-varying network is in states S, E, I or R at times t <= t0.
+  subroutine dmp_alg( &
+      model,          &
+      history,        &
+      indices,        &
+      N,              &
+      nodes,          &
+      patient_zeros,  &
+      epi_params,     &
+      p               &
   )
-    character(len=*), intent(in)  :: model                                         !> Epidemiological model.
-    double precision, intent(in)  :: alpha_, lambda_, mu_, nu_                     !>
-    double precision, intent(out) :: p(:, 0:, :)                                   !> DMP marginal probabilities.
-    double precision              :: alpha, lambda, mu, nu                         !> Epidemiological parameters.
-    double precision              :: theta_ki, xi                                  !>
-    integer,          intent(in)  :: nodes(:)                                      !>
-    integer,          intent(in)  :: patient_zeros(:)                              !> Patient zeros.
-    integer,          intent(in)  :: t0                                            !> Observation time.
-    integer                       :: alti, altk, hsize, i, ik, isize, k, ki, N, t  !>
-    type(int_llist),  intent(in)  :: indices(:)                                    !> Active links throughout the simulation.
-    type(node),       intent(in)  :: history(:)                                    !> Rewiring history.
-    type(dbl_list)                :: nps(size(history))                            !>
-    type(dbl_list)                :: ops(size(history))                            !>
-    type(dbl_list)                :: phi(size(history))                            !>
-    type(dbl_list)                :: psi(size(history))                            !>
-    type(dbl_list)                :: theta(size(history))                          !>
+    integer,          intent(in)  :: N                                  !> Number of nodes.
+    integer,          intent(in)  :: nodes(:)                           !> Nodes participating in the iteration.
+    integer,          intent(in)  :: patient_zeros(:)                   !>
+    integer                       :: alti, altk, i, ik, k, ki, t, t0    !>
+    integer                       :: hsize, isize, nsize                !>
+    character(len=*), intent(in)  :: model                              !> Epidemiological model.
+    double precision, intent(out) :: p(:, 0:, :)                        !> DMP marginal probabilities.
+    double precision              :: pa, pl, pm, pn, xi                 !>
+    type(dbl_list)                :: mf(N), mn(N), mo(N), mp(N), mt(N)  !> DMP messages.
+    type(int_llist),  intent(in)  :: indices(:)                         !> Active links throughout the simulation.
+    type(node),       intent(in)  :: history(:)                         !> Rewiring history.
+    type(prm),        intent(in)  :: epi_params                         !> Epidemiological parameters.
 
-    !> Number of nodes.
-    N = size(history)
+    !> Local observation time.
+    t0 = epi_params%t0
 
     !> We choose the local epidemiological parameters based on the model in use.
     select case (trim(model))
       case ('SIR')
-        nu = mu_
-        mu = 0.0d0
+        pa = epi_params%lambda
+        pl = 0.0d0
+        pm = 0.0d0
+        pn = epi_params%mu
         xi = 0.0d0
-        alpha = lambda_
-        lambda = 0.0d0
       case default
-        mu = mu_
-        nu = nu_
-        xi = nu_
-        alpha = alpha_
-        lambda = lambda_
+        pa = epi_params%alpha
+        pl = epi_params%lambda
+        pm = epi_params%mu
+        pn = epi_params%nu
+        xi = epi_params%nu
     end select
 
-    !> Initial conditions for the marginal probabilities.
+    !> Initial condition for the marginal probability of being S.
     p(1, 0, :) = 1.0d0; p(1, 0, patient_zeros) = 0.0d0
+
+    !> Initial conditions for the marginal probabilities of being E, I or R, respectively.
     p(2, 0, :) = 1.0d0 - p(1, 0, :)
     p(3, 0, :) = 0.0d0
     p(4, 0, :) = 0.0d0
 
-    !> Initial conditions for the DMP(r) messages.
+    !> Initial conditions for the DMP messages.
     do i = 1, N
       hsize = size(history(i)%neighbors)
 
-      allocate(ops(i)%array(hsize), nps(i)%array(hsize), phi(i)%array(hsize), &
-        psi(i)%array(hsize), theta(i)%array(hsize))
+      allocate(mf(i)%array(hsize))
+      allocate(mn(i)%array(hsize))
+      allocate(mo(i)%array(hsize))
+      allocate(mp(i)%array(hsize))
+      allocate(mt(i)%array(hsize))
 
       do ki = 1, hsize
         k = history(i)%neighbors(ki)
 
-        ops(i)%array(ki) = p(1, 0, k)
-        nps(i)%array(ki) = p(1, 0, k)
-        phi(i)%array(ki) = p(3, 0, k)
-        psi(i)%array(ki) = p(2, 0, k)
-        theta(i)%array(ki) = 1.0d0
+        mf(i)%array(ki) = p(3, 0, k)
+        mn(i)%array(ki) = p(1, 0, k)
+        mo(i)%array(ki) = p(1, 0, k)
+        mp(i)%array(ki) = p(2, 0, k)
+        mt(i)%array(ki) = 1.0d0
       end do
     end do
 
+    !> We compute the DMP marginal probabilities at times t <= t0.
+    nsize = size(nodes)
     do t = 1, t0
-      !> We apply the DMP(r) iteration to compute the marginal probabilities that
-      !> each node is in a given state at time t.
-      do alti = 1, size(nodes)
+      do alti = 1, nsize
         i = nodes(alti)
 
+        !> Number of active links of node i at time t.
         isize = size(indices(i)%time(t)%array)
+
         if (isize > 0) then
           !> We update the thetas that enter node i at time t.
           do altk = 1, isize
             ki = indices(i)%time(t)%array(altk)
-            theta(i)%array(ki) = theta(i)%array(ki) - alpha*psi(i)%array(ki)
-            theta(i)%array(ki) = theta(i)%array(ki) - lambda*phi(i)%array(ki)
+
+            mt(i)%array(ki) = mt(i)%array(ki) - pa*mp(i)%array(ki) - pl*mf(i)%array(ki)
           end do
 
           !> We calculate the probability that node i is S at time t.
-          p(1, t, i) = p(1, 0, i) * product(theta(i)%array)
+          p(1, t, i) = p(1, 0, i) * product(mt(i)%array)
 
           !> We update the npses that leave node i at time t.
           do ki = 1, size(history(i)%neighbors)
-            k = history(i)%neighbors(ki)
-            ik = history(i)%opposites(ki)
-            theta_ki = theta(i)%array(ki)
-            if (theta_ki > 0.0d0) then
-              nps(k)%array(ik) = p(1, t, i) / theta_ki
+            k = history(i)%neighbors(ki); ik = history(i)%opposites(ki)
+
+            if (mt(i)%array(ki) > 0.0d0) then
+              mn(k)%array(ik) = p(1, t, i) / mt(i)%array(ki)
             else
-              nps(k)%array(ik) = p(1, 0, i) * product(pop(theta(i)%array, ki))
+              mn(k)%array(ik) = p(1, 0, i) * product(pop(mt(i)%array, ki))
             end if
           end do
+        else
+          p(1, t, i) = p(1, t-1, i)
         end if
       end do
 
-      do alti = 1, size(nodes)
+      do alti = 1, nsize
         i = nodes(alti)
 
         !> We update the phis and psis that enter node i at time t.
         do altk = 1, size(indices(i)%time(t)%array)
           ki = indices(i)%time(t)%array(altk)
-          psi(i)%array(ki) = (1.0d0-alpha) * psi(i)%array(ki)
-          phi(i)%array(ki) = (1.0d0-lambda) * phi(i)%array(ki)
+
+          mf(i)%array(ki) = (1.0d0-pl) * mf(i)%array(ki)
+          mp(i)%array(ki) = (1.0d0-pa) * mp(i)%array(ki)
         end do
-        phi(i)%array = (1.0d0-mu)*phi(i)%array + xi*psi(i)%array
-        psi(i)%array = (1.0d0-nu)*psi(i)%array + ops(i)%array - nps(i)%array
+        mf(i)%array = (1.0d0-pm) * mf(i)%array + mp(i)%array * xi
+        mp(i)%array = (1.0d0-pn) * mp(i)%array + mo(i)%array - mn(i)%array
 
         !> We update the opses that enter node i at time t.
-        ops(i)%array = nps(i)%array
+        mo(i)%array = mn(i)%array
 
-        !> We compute the other marginal probabilities at time t.
-        p(4, t, i) = p(4, t-1, i) + mu*p(3, t-1, i)
-        p(3, t, i) = p(3, t-1, i) - mu*p(3, t-1, i) + nu*p(2, t-1, i)
+        !> We compute the probabilities that node i is R or I at time t, respectively.
+        p(4, t, i) = p(4, t-1, i) + pm*p(3, t-1, i)
+        p(3, t, i) = p(3, t-1, i) - pm*p(3, t-1, i) + pn*p(2, t-1, i)
 
+        !> We compute the probability that node i is E at time t.
         p(2, t, i) = 1.0d0 - p(1, t, i) - p(3, t, i) - p(4, t, i)
       end do
     end do
 
-    !> If we are considering the SIR model, in the end we have to perform the
-    !> following exchanges: (pe, pi, pr) --> (0.0d0, pe, pi).
+    !> For the SIR model, we must perform the following exchanges:
     if (trim(model) == 'SIR') p(3:4, :, :) = p(2:3, :, :); p(2, :, :) = 0.0d0
-  end subroutine dmp
+  end subroutine dmp_alg
 end module dmp_algorithms

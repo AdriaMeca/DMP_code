@@ -1,6 +1,6 @@
 !> Procedures for generating random numbers.
 !> Authors: Matteo Palassini and Adria Meca Montserrat.
-!> Last modified date: 03/08/22.
+!> Last modified date: 12/08/22.
 module random_number_generator
   implicit none
 
@@ -35,9 +35,6 @@ contains
   !> Returns a uniform random deviation between 0.0d0 and 1.0d0 (excluding endpoints).
   !> Adapted from the book 'Numerical recipes in Fortran 77'.
   function ran2(idum)
-    double precision, parameter                :: am = 1.0d0 / 2147483563.0d0              !>
-    double precision, parameter                :: eps = 1.2d-7, rnmx = 1 - eps             !>
-    double precision                           :: ran2                                     !> Output.
     integer,                     intent(inout) :: idum                                     !>
     integer,          parameter                :: ia1 = 40014, ia2 = 40692                 !>
     integer,          parameter                :: im1 = 2147483563, imm1 = im1 - 1         !>
@@ -47,6 +44,9 @@ contains
     integer,          parameter                :: ntab = 32, ndiv = 67108862               !>
     integer,          save                     :: idum2 = 123456789, iv(ntab) = 0, iy = 0  !>
     integer                                    :: idx1, idx2, j, k                         !>
+    double precision, parameter                :: am = 1.0d0 / 2147483563.0d0              !>
+    double precision, parameter                :: eps = 1.2d-7, rnmx = 1.0d0 - eps         !>
+    double precision                           :: ran2                                     !> Output.
 
     !> Initialization.
     if (idum <= 0) then
@@ -88,8 +88,7 @@ contains
     j = 1 + iy/ndiv
 
     !> We shuffle 'idum', which is combined with 'idum2' to generate output.
-    iy = iv(j) - idum2
-    iv(j) = idum
+    iy = iv(j) - idum2; iv(j) = idum
     if (iy < 1) iy = iy + imm1
 
     !> This is done because users do not expect endpoint values.
