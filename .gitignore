@@ -1,3 +1,29 @@
-#Ignore all files and directories whose names begin with 'temp' or 'test'.
+# Ignore everything in the 'data' folder.
+data/*
+
+# Ignore everything in the 'figures' folder.
+figures/*
+
+# Ignore everything in the 'gnu_dir' folder.
+gnu_dir/*
+
+# Ignore everything in the 'mod_dir' folder.
+mod_dir/*
+
+# Ignore everything in the 'obj_dir' folder.
+obj_dir/*
+
+# Ignore everything in the 'simulations' folder except files with these extensions.
+simulations/*
+!/simulations/*.f90
+!/simulations/*.mk
+!/simulations/*.txt
+
+# Ignore everything in the 'testing' folder.
+testing/*
+
+# Ignore temporary files and folders.
 temp*
-test*
+
+# Do not ignore README files.
+!/**/README.md
