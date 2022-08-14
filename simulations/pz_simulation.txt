@@ -1,15 +1,16 @@
-10
+1000
 F
 F
-PN
-4, 1.0d0, 1000, 0.0d0
+RRG
+4 1.0d0 1000 0.0d0
 SIR
-0.15d0, 0.7d0, 0.5d0, 0.2d0, 10
+0.15d0 0.7d0 0.5d0 0.2d0 10
 
 # Description:
-# 1.- T/F: random/fixed seed.
-# 2.- T/F: DMPr/DMP algorithm.
-# 3.- Network parameters: c, l and N.
-# 4.- Type of graph, epidemiological model and variable parameter.
-# 5.- Start point, end point, # points, type of scale and # instances.
-# 6.- Epidemiological parameters: # seeds, alpha, lambda, mu, nu, t0 and Q.
+# 1.- Number of instances.
+# 2.- T/F: random/fixed seed.
+# 3.- T/F: DMPr/DMP algorithm.
+# 4.- Network type.
+# 5.- Network properties: c, l, N and Q.
+# 6.- Epidemiological model.
+# 7.- Epidemiological parameters: alpha, lambda, mu, nu and t0.
