@@ -1,5 +1,5 @@
 # Author: Adria Meca Montserrat.
-# Last modified date: 14/08/22.
+# Last modified date: 17/08/22.
 
 # Function that filters out strings containing 'v' from a given list of strings.
 my_filter = $(foreach v,$(2),$(if $(findstring $(1),$(v)),,$(v)))
@@ -20,7 +20,7 @@ list1 := $(filter-out %types.o %generator.o,$(objects))
 list2 := $(filter-out %procedures.o %algorihtms.o %simulations.o %properties.o,$(list1))
 
 # Main program and its byproducts.
-src := pz_simulation.f90
+src := ./pz_simulation.f90
 obj := $(patsubst %.f90,%.o,$(src))
 exe := $(patsubst %.o,%.exe,$(obj))
 
