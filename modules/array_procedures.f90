@@ -1,6 +1,6 @@
 !> Procedures to create, modify and study arrays.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 12/08/22.
+!> Last modified date: 17/08/22.
 module array_procedures
   use derived_types, only: int_list
 
@@ -17,7 +17,7 @@ module array_procedures
   end interface argsort
 
   interface find
-    module procedure find_int
+    module procedure find_int, find_str
   end interface find
 
   interface my_pack
@@ -42,6 +42,23 @@ contains
       end if
     end do
   end function find_int
+
+
+  !> Looks for the position of a string in a list of strings.
+  function find_str(list, element)
+    integer                      :: find_str  !> Output.
+    integer                      :: t         !>
+    character(len=*), intent(in) :: element   !>
+    character(len=*), intent(in) :: list(:)   !>
+
+    find_str = size(list)
+    do t = 1, find_str
+      if (list(t) == element) then
+        find_str = t
+        exit
+      end if
+    end do
+  end function find_str
 
 
   !> Returns the indices that would sort a list of doubles in ascending order.
