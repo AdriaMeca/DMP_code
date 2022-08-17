@@ -17,7 +17,7 @@ program pz_simulation
   integer                       :: epi_size                                  !> Epidemic size.
   integer                       :: patient_zeros(1)                          !>
   integer                       :: ppz, tpz                                  !>
-  integer                       :: t, t0, t1, t2                             !>
+  integer                       :: t0, t1, t2                                !>
   integer                       :: values(8)                                 !>
   character(len=1), allocatable :: states(:, :)                              !> Distribution of node states.
   character(len=9)              :: graph, model                              !>
@@ -94,20 +94,10 @@ program pz_simulation
     r0 = find(non_S, tpz) - 1
 
     !> We compute the time t1 at which the predicted patient zero got infected.
-    do t = 0, t0
-      if (states(t, ppz) == 'I') then
-        t1 = t
-        exit
-      end if
-    end do
+    t1 = find(states(:, ppz), 'I') - 1
 
     !> We compute the time t2 at which the true patient zero recovered.
-    do t = 0, t0
-      if (states(t, tpz) == 'R') then
-        t2 = t
-        exit
-      end if
-    end do
+    t2 = find(states(:, tpz), 'R') - 1
 
     !> Energies.
     open(unit=15, file='pz_simulation'//'_energies.dat', position='append')
