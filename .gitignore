@@ -1,3 +1,6 @@
+# Author: Adria Meca Montserrat.
+# Last modified date: 24/08/22.
+
 # Ignore everything in the 'data' folder.
 data/*
 
@@ -16,8 +19,8 @@ obj_dir/*
 # Ignore everything in the 'simulations' folder except files with these extensions.
 simulations/*
 !/simulations/*.f90
-!/simulations/*.mk
 !/simulations/*.txt
+!/simulations/Makefile
 
 # Ignore everything in the 'testing' folder.
 testing/*
