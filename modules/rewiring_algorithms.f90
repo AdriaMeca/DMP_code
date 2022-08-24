@@ -1,6 +1,6 @@
 !> Procedures that rewire the links in a network over time.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 12/08/22.
+!> Last modified date: 24/08/22.
 module rewiring_algorithms
   use array_procedures,        only: add, find, my_pack
   use derived_types,           only: int_list, int_llist, node
@@ -77,7 +77,7 @@ contains
         end do
 
         !> We save the active links of node i at time t.
-        call add(indices(i)%time, locations, 0)
+        call add(indices(i)%time, locations, lb_=0)
 
         deallocate(locations%array)
       end do

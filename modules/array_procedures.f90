@@ -1,6 +1,6 @@
 !> Procedures to create, modify and study arrays.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 17/08/22.
+!> Last modified date: 24/08/22.
 module array_procedures
   use derived_types, only: int_list
 
@@ -265,6 +265,7 @@ contains
       do i = 1, isize
         e = energies(i)
         n = node_ids(i)
+
         if (abs(e - pivot) < eps) then
           call add(e_eq, e)
           call add(n_eq, n)

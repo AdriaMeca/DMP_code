@@ -6,8 +6,8 @@ ifeq ($(name),)
 	name := probabilities
 endif
 
-ifeq ($(type),)
-	type := probabilities
+ifeq ($(mode),)
+	mode := probabilities
 endif
 
 # Commonly used folders.
@@ -21,23 +21,21 @@ dependencies += $(obj_dir)network_generation.o
 dependencies += $(obj_dir)random_number_generator.o
 dependencies += $(obj_dir)rewiring_algorithms.o
 
-ifeq ($(type), probabilities)
+ifeq ($(mode), probabilities)
 	dependencies += $(obj_dir)dmp_algorithms.o
 	dependencies += $(obj_dir)mc_simulations.o
 
 	attachments := $(dependencies)
 	attachments += $(obj_dir)array_procedures.o
 	attachments += $(obj_dir)network_properties.o
-else
-	ifeq ($(type), pz_simulation)
-		dependencies += $(obj_dir)array_procedures.o
-		dependencies += $(obj_dir)patient_zero_problem.o
+else ifeq ($(mode), pz_simulation)
+	dependencies += $(obj_dir)array_procedures.o
+	dependencies += $(obj_dir)patient_zero_problem.o
 
-		attachments := $(dependencies)
-		attachments += $(obj_dir)dmp_algorithms.o
-		attachments += $(obj_dir)mc_simulations.o
-		attachments += $(obj_dir)network_properties.o
-	endif
+	attachments := $(dependencies)
+	attachments += $(obj_dir)dmp_algorithms.o
+	attachments += $(obj_dir)mc_simulations.o
+	attachments += $(obj_dir)network_properties.o
 endif
 
 # Compilation flags.
