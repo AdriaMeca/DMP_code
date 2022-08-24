@@ -14,7 +14,6 @@ program pz_simulation
 
   integer,          allocatable :: non_S(:)                                  !> Non-susceptible nodes.
   integer                       :: alti, c, i, idx, instances, iseed, N, r0  !>
-  integer                       :: epi_size                                  !> Epidemic size.
   integer                       :: patient_zeros(1)                          !>
   integer                       :: ppz, tpz                                  !>
   integer                       :: t0, t1, t2                                !>
@@ -33,6 +32,7 @@ program pz_simulation
 
   !> Parameters.
   open(unit=10, file='pz_simulation'//'.txt')
+    read(10, *)                            !>
     read(10, *) instances                  !> Number of instances.
     read(10, *) randomized                 !> T: Random seed; F: Fixed seed.
     read(10, *) restricted                 !> T: DMPr; F: DMP.
@@ -57,13 +57,13 @@ program pz_simulation
   !> We initialize the random number generator.
   call setr1279(iseed)
 
-  !> We initialize the node positions.
-  r = sqrt(dble(N)) * reshape([(r1279(), i=1,2*N)], [N, 2])
-
   do idx = 1, instances
     !> We create a network of the chosen type.
     select case (trim(graph))
       case ('PN')
+        !> We initialize the node positions.
+        r = sqrt(dble(N)) * reshape([(r1279(), i=1,2*N)], [N, 2])
+
         network = PN(N, c, r, l)
       case ('RRG')
         network = RRG(N, c)
@@ -101,11 +101,10 @@ program pz_simulation
 
     !> Energies.
     open(unit=15, file='pz_simulation'//'_energies.dat', position='append')
-      epi_size = size(non_S)
-      do alti = 1, min(epi_size, 100)
+      do alti = 1, min(size(non_S), 100)
         e = energies(alti); i = non_S(alti)
 
-        if (e < 1/small) write(15, '(3i10,es26.16)') idx, epi_size, i, e
+        if (e < 1/small) write(15, '(2i10,es26.16)') idx, i, e
       end do
     close(15)
 
