@@ -1,0 +1,18 @@
+500
+1000
+F
+F
+RRG
+4 1.0d0 1000 0.0d0
+SIR
+0.15d0 0.7d0 0.5d0 0.2d0 10
+
+# Description:
+# 1.- Number of Monte Carlo repetitions.
+# 2.- Number of instances.
+# 3.- T/F: random/fixed seed.
+# 4.- T/F: DMPr/DMP algorithm.
+# 5.- Network type.
+# 6.- Network properties: c, l, N and Q.
+# 7.- Epidemiological model.
+# 8.- Epidemiological parameters: alpha, lambda, mu, nu and t0.
