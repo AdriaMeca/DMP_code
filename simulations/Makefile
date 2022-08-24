@@ -10,6 +10,11 @@ ifeq ($(type),)
 	type := probabilities
 endif
 
+# Commonly used folders.
+modules := ../modules/
+mod_dir := ../mod_dir/
+obj_dir := ../obj_dir/
+
 # Dependencies and attachments of the main program.
 dependencies := $(obj_dir)derived_types.o
 dependencies += $(obj_dir)network_generation.o
@@ -34,11 +39,6 @@ else
 		attachments += $(obj_dir)network_properties.o
 	endif
 endif
-
-# Commonly used folders.
-modules := ../modules/
-mod_dir := ../mod_dir/
-obj_dir := ../obj_dir/
 
 # Compilation flags.
 options := -I $(mod_dir) -J $(mod_dir) -g -Wall -Wextra -pedantic -std=f2003 -O3
@@ -94,7 +94,7 @@ clean:
 	rm -f $(exe) $(obj)
 
 hard-clean:
-	rm -f $(mod_dir)*.mod $(obj_dir)*.o $(exe) $(obj)
+	rm -f $(mod_dir)*.mod $(obj_dir)*.o
 
 run:
 	@$(exe)
