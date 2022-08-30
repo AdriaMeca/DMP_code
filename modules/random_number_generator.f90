@@ -1,6 +1,6 @@
 !> Procedures for generating random numbers.
 !> Authors: Matteo Palassini and Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 30/08/22.
 module random_number_generator
   implicit none
 
@@ -14,21 +14,14 @@ module random_number_generator
   public :: ir1279, r1279, setr1279
 
 contains
-  !> Returns random integers uniformly distributed over [0, maxint].
-  function ir1279()
-    integer :: ir1279  !> Output.
-
-    ioffset = iand(ioffset+1, 2047)
-    irand(ioffset) = irand(index1(ioffset)) * irand(index2(ioffset))
-    ir1279 = ishft(irand(ioffset), -1)
-  end function ir1279
-
-
   !> Returns random doubles uniformly distributed over [0.0d0, 1.0d0].
   function r1279()
-    double precision :: r1279  !> Output.
+    integer          :: rngint  !>
+    double precision :: r1279   !> Output.
 
-    r1279 = ir1279() * inv_maxint
+    call ir1279(rngint)
+
+    r1279 = rngint * inv_maxint
   end function r1279
 
 
@@ -94,6 +87,17 @@ contains
     !> This is done because users do not expect endpoint values.
     ran2 = min(am*iy, rnmx)
   end function ran2
+
+
+  !> Returns random integers uniformly distributed over [0, maxint].
+  subroutine ir1279(rngint)
+    integer, intent(out) :: rngint  !> Random integer that lies within the interval [0, maxint].
+
+    ioffset = iand(ioffset+1, 2047)
+    irand(ioffset) = irand(index1(ioffset)) * irand(index2(ioffset))
+
+    rngint = ishft(irand(ioffset), -1)
+  end subroutine ir1279
 
 
   !> Initializes the Lagged Fibonacci random number generator.
