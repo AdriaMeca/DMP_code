@@ -12,10 +12,6 @@ module array_procedures
     module procedure add_dbl, add_int, add_int_list
   end interface add
 
-  interface argsort
-    module procedure dbl_argsort, int_argsort
-  end interface argsort
-
   interface find
     module procedure find_int, find_str
   end interface find
@@ -24,7 +20,7 @@ module array_procedures
     module procedure my_pack_int
   end interface my_pack
 
-  public :: add, argsort, find, my_pack, pop, quicksort
+  public :: add, find, my_pack, pop, quicksort
 
 contains
   !> Looks for the position of an integer in a list of integers.
@@ -59,48 +55,6 @@ contains
       end if
     end do
   end function find_str
-
-
-  !> Returns the indices that would sort a list of doubles in ascending order.
-  function dbl_argsort(list)
-    double precision, intent(in) :: list(:)                  !>
-    double precision             :: copy_list(size(list))    !>
-    integer                      :: dbl_argsort(size(list))  !> Output.
-    integer                      :: i, j                     !>
-
-    !> Insertion sort algorithm.
-    copy_list = list
-    dbl_argsort = [(i, i=1,size(list))]
-    do i = 2, size(list)
-      j = i
-      do while ((j > 1) .and. (copy_list(j-1) > copy_list(j)))
-        copy_list([j-1, j]) = copy_list([j, j-1])
-        dbl_argsort([j-1, j]) = dbl_argsort([j, j-1])
-        j = j - 1
-      end do
-    end do
-  end function dbl_argsort
-
-
-  !> Returns the indices that would sort a list of integers in ascending order.
-  function int_argsort(list)
-    integer, intent(in) :: list(:)                  !>
-    integer             :: copy_list(size(list))    !>
-    integer             :: i, j                     !>
-    integer             :: int_argsort(size(list))  !> Output.
-
-    !> Insertion sort algorithm.
-    copy_list = list
-    int_argsort = [(i, i=1,size(list))]
-    do i = 2, size(list)
-      j = i
-      do while ((j > 1) .and. (copy_list(j-1) > copy_list(j)))
-        copy_list([j-1, j]) = copy_list([j, j-1])
-        int_argsort([j-1, j]) = int_argsort([j, j-1])
-        j = j - 1
-      end do
-    end do
-  end function int_argsort
 
 
   !> Returns a list without its i-th element.
