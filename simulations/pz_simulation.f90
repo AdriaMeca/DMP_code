@@ -31,7 +31,7 @@ program pz_simulation
   type(prm)                     :: epi_params                                !> Epidemiological parameters.
 
   !> Parameters.
-  open(unit=10, file='pz_simulation'//'.txt')
+  open(unit=10, file='parameters'//'.txt')
     read(10, *)                            !>
     read(10, *) instances                  !> Number of instances.
     read(10, *) randomized                 !> T: Random seed; F: Fixed seed.
