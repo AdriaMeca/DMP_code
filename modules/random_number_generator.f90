@@ -1,15 +1,15 @@
 !> Procedures for generating random numbers.
 !> Authors: Matteo Palassini and Adria Meca Montserrat.
-!> Last modified date: 30/08/22.
+!> Last modified date: 03/09/22.
 module random_number_generator
   implicit none
 
   private
 
   !> Global variables.
-  double precision, parameter :: inv_maxint = 1.0d0 / 2147483647.0d0            !>
   integer                     :: index1(0:2047), index2(0:2047), irand(0:2047)  !>
   integer                     :: ioffset                                        !>
+  double precision, parameter :: inv_maxint = 1.0d0 / 2147483647.0d0            !>
 
   public :: ir1279, r1279, setr1279
 

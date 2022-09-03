@@ -1,6 +1,6 @@
 !> Procedures that generate networks of different types.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module network_generation
   use array_procedures,        only: add, my_pack
   use derived_types,           only: node

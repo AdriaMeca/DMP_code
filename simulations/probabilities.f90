@@ -1,7 +1,7 @@
 !> Simulation that computes the DMP and MC marginal probabilities that each node
 !> in a time-varying network is in states S, E, I or R at times t <= t0.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 program probabilities
   use derived_types,           only: int_llist, node, prm
   use dmp_algorithms,          only: dmp_alg

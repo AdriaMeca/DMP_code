@@ -1,6 +1,6 @@
 !> Procedures for studying the properties of networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module network_properties
   use derived_types, only: node
 

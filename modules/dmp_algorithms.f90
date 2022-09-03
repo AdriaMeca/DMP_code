@@ -1,7 +1,7 @@
 !> Procedures for computing the marginal probabilities that each node in a time-
 !> varying network is in states S, E, I or R at times t <= t0.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module dmp_algorithms
   use array_procedures, only: my_pack, pop
   use derived_types,    only: dbl_list, int_llist, node, prm

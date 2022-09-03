@@ -1,6 +1,6 @@
 !> Procedures that simulate the patient-zero problem.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module patient_zero_problem
   use array_procedures,        only: my_pack, quicksort
   use derived_types,           only: int_llist, node, prm

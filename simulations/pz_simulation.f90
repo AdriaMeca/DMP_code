@@ -1,7 +1,7 @@
 !> Simulation that tests the efficiency with which the DMP-based inference algorithm
 !> locates the true patient zero of an epidemic.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 program pz_simulation
   use array_procedures,        only: find
   use derived_types,           only: int_llist, node, prm

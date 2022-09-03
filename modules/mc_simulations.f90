@@ -1,6 +1,6 @@
 !> Procedures that simulate the spread of epidemics on time-varying networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module mc_simulations
   use derived_types,           only: int_llist, node, prm
   use random_number_generator, only: r1279

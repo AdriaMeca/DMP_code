@@ -1,6 +1,6 @@
 !> Procedures to create, modify and study arrays.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module array_procedures
   use derived_types, only: int_list
 

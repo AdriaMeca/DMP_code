@@ -1,6 +1,6 @@
 !> Derived types used throughout the code.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 24/08/22.
+!> Last modified date: 03/09/22.
 module derived_types
   implicit none
 

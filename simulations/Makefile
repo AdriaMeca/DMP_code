@@ -1,5 +1,5 @@
 # Author: Adria Meca Montserrat.
-# Last modified date: 24/08/22.
+# Last modified date: 03/09/22.
 
 # Command line arguments.
 ifeq ($(name),)
