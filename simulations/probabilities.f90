@@ -1,9 +1,9 @@
 !> Simulation that computes the DMP and MC marginal probabilities that each node
 !> in a time-varying network is in states S, E, I or R at times t <= t0.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 program probabilities
-  use derived_types,           only: int_llist, node, prm
+  use derived_types,           only: int_list, node, prm
   use dmp_algorithms,          only: dmp_alg
   use mc_simulations,          only: mc_sim
   use network_generation,      only: PN, RRG
@@ -22,7 +22,7 @@ program probabilities
   double precision, allocatable :: r(:, :)                                         !> Node positions.
   double precision              :: alpha, l, lambda, mu, nu, Q                     !>
   logical                       :: randomized                                      !>
-  type(int_llist),  allocatable :: indices(:)                                      !> Active links throughout the simulation.
+  type(int_list),   allocatable :: indices(:, :)                                   !> Active links throughout the simulation.
   type(node),       allocatable :: history(:)                                      !> Rewiring history.
   type(node),       allocatable :: network(:)                                      !> Original network.
   type(prm)                     :: epi_params                                      !> Epidemiological parameters.
@@ -44,7 +44,7 @@ program probabilities
   allocate(r(N, 2))
   allocate(nodes(N))
   allocate(states(0:t0+1, N))
-  allocate(history(N), indices(N), network(N))
+  allocate(history(N), indices(N, 0:t0), network(N))
   allocate(p_dmp(4, 0:t0, N), p_mc(4, 0:t0, N))
 
   !> Nodes participating in the iteration of the DMP algorithm.

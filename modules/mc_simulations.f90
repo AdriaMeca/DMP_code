@@ -1,8 +1,8 @@
 !> Procedures that simulate the spread of epidemics on time-varying networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 module mc_simulations
-  use derived_types,           only: int_llist, node, prm
+  use derived_types,           only: int_list, node, prm
   use random_number_generator, only: r1279
 
   implicit none
@@ -20,7 +20,7 @@ contains
     character(len=1), intent(out) :: states(0:, :)         !> Distribution of node states.
     double precision              :: p1, p2, r             !>
     double precision              :: pa, pl, pm, pn        !>
-    type(int_llist),  intent(in)  :: indices(:)            !> Active links throughout the simulation.
+    type(int_list),   intent(in)  :: indices(:, 0:)        !> Active links throughout the simulation.
     type(node),       intent(in)  :: history(:)            !> Rewiring history.
     type(prm),        intent(in)  :: epi_params            !> Epidemiological parameters.
 
@@ -57,8 +57,8 @@ contains
             p1 = 1.0d0
             p2 = 1.0d0
 
-            do altk = 1, size(indices(i)%time(t)%array)
-              k = history(i)%neighbors(indices(i)%time(t)%array(altk))
+            do altk = 1, size(indices(i, t)%array)
+              k = history(i)%neighbors(indices(i, t)%array(altk))
 
               p1 = p1 * (1.0d0 - pa*merge(1.0d0, 0.0d0, states(t, k) == 'E'))
               p2 = p2 * (1.0d0 - pl*merge(1.0d0, 0.0d0, states(t, k) == 'I'))

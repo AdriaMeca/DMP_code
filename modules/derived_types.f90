@@ -1,6 +1,6 @@
 !> Derived types used throughout the code.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 module derived_types
   implicit none
 
@@ -13,11 +13,6 @@ module derived_types
   type, public :: int_list
     integer, allocatable :: array(:)
   end type int_list
-
-  !> List of lists of integers.
-  type, public :: int_llist
-    type(int_list), allocatable :: time(:)
-  end type int_llist
 
   type, public :: node
     integer, allocatable :: neighbors(:)

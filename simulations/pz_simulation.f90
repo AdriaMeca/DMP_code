@@ -1,10 +1,10 @@
 !> Simulation that tests the efficiency with which the DMP-based inference algorithm
 !> locates the true patient zero of an epidemic.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 program pz_simulation
   use array_procedures,        only: find
-  use derived_types,           only: int_llist, node, prm
+  use derived_types,           only: int_list, node, prm
   use network_generation,      only: PN, RRG
   use patient_zero_problem,    only: pz_problem
   use random_number_generator, only: r1279, setr1279
@@ -25,7 +25,7 @@ program pz_simulation
   double precision, parameter   :: small = 1.0d-300                          !>
   double precision              :: alpha, e, l, lambda, mu, nu, Q            !>
   logical                       :: restricted, randomized                    !>
-  type(int_llist),  allocatable :: indices(:)                                !> Active links throughout the simulation.
+  type(int_list),   allocatable :: indices(:, :)                             !> Active links throughout the simulation.
   type(node),       allocatable :: history(:)                                !> Rewiring history.
   type(node),       allocatable :: network(:)                                !> Original network.
   type(prm)                     :: epi_params                                !> Epidemiological parameters.
@@ -46,7 +46,7 @@ program pz_simulation
 
   allocate(r(N, 2))
   allocate(states(0:t0+1, N))
-  allocate(history(N), indices(N), network(N))
+  allocate(history(N), indices(N, 0:t0), network(N))
 
   !> We initialize the epidemiological parameters.
   epi_params = prm(t0, alpha, lambda, mu, nu)
@@ -109,18 +109,18 @@ program pz_simulation
     close(15)
 
     !> Output.
-    write(*, '(12i10)')                                                             &
-      tpz,                                                                          &
-      ppz,                                                                          &
-      r0,                                                                           &
-      t1,                                                                           &
-      t2,                                                                           &
-      merge(1, 0, any(history(ppz)%neighbors(indices(ppz)%time(t1)%array) == tpz)), &
-      count(states(t0, :) == 'I'),                                                  &
-      count(states(t0, :) == 'R'),                                                  &
-      count(states(t1, :) == 'I'),                                                  &
-      count(states(t1, :) == 'R'),                                                  &
-      count(states(t2, :) == 'I'),                                                  &
+    write(*, '(12i10)')                                                        &
+      tpz,                                                                     &
+      ppz,                                                                     &
+      r0,                                                                      &
+      t1,                                                                      &
+      t2,                                                                      &
+      merge(1, 0, any(history(ppz)%neighbors(indices(ppz, t1)%array) == tpz)), &
+      count(states(t0, :) == 'I'),                                             &
+      count(states(t0, :) == 'R'),                                             &
+      count(states(t1, :) == 'I'),                                             &
+      count(states(t1, :) == 'R'),                                             &
+      count(states(t2, :) == 'I'),                                             &
       count(states(t2, :) == 'R')
   end do
 end program pz_simulation

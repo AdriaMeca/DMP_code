@@ -1,9 +1,9 @@
 !> Procedures that simulate the patient-zero problem.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 module patient_zero_problem
   use array_procedures,        only: my_pack, quicksort
-  use derived_types,           only: int_llist, node, prm
+  use derived_types,           only: int_list, node, prm
   use dmp_algorithms,          only: dmp_alg
   use mc_simulations,          only: mc_sim
   use random_number_generator, only: r1279
@@ -39,7 +39,7 @@ contains
     double precision, parameter                :: small = 1.0d-300         !>
     double precision                           :: joint                    !> P(O|i).
     logical,                       intent(in)  :: restricted               !> T: DMPr; F: DMP.
-    type(int_llist),               intent(in)  :: indices(:)               !> Active links throughout the simulation.
+    type(int_list),                intent(in)  :: indices(:, 0:)           !> Active links throughout the simulation.
     type(node),                    intent(in)  :: history(:)               !> Rewiring history.
     type(prm),                     intent(in)  :: epi_params               !> Epidemiological parameters.
 

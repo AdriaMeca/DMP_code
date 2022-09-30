@@ -1,10 +1,10 @@
 !> Procedures for computing the marginal probabilities that each node in a time-
 !> varying network is in states S, E, I or R at times t <= t0.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 module dmp_algorithms
   use array_procedures, only: my_pack, pop
-  use derived_types,    only: dbl_list, int_llist, node, prm
+  use derived_types,    only: dbl_list, int_list, node, prm
 
   implicit none
 
@@ -34,7 +34,7 @@ contains
     double precision, intent(out) :: p(:, 0:, :)                        !> DMP marginal probabilities.
     double precision              :: pa, pl, pm, pn, xi                 !>
     type(dbl_list)                :: mf(N), mn(N), mo(N), mp(N), mt(N)  !> DMP messages.
-    type(int_llist),  intent(in)  :: indices(:)                         !> Active links throughout the simulation.
+    type(int_list),   intent(in)  :: indices(:, 0:)                     !> Active links throughout the simulation.
     type(node),       intent(in)  :: history(:)                         !> Rewiring history.
     type(prm),        intent(in)  :: epi_params                         !> Epidemiological parameters.
 
@@ -93,12 +93,12 @@ contains
         i = nodes(alti)
 
         !> Number of active links of node i at time t.
-        isize = size(indices(i)%time(t)%array)
+        isize = size(indices(i, t)%array)
 
         if (isize > 0) then
           !> We update the thetas that enter node i at time t.
           do altk = 1, isize
-            ki = indices(i)%time(t)%array(altk)
+            ki = indices(i, t)%array(altk)
 
             mt(i)%array(ki) = mt(i)%array(ki) - pa*mp(i)%array(ki) - pl*mf(i)%array(ki)
           end do
@@ -125,8 +125,8 @@ contains
         i = nodes(alti)
 
         !> We update the phis and psis that enter node i at time t.
-        do altk = 1, size(indices(i)%time(t)%array)
-          ki = indices(i)%time(t)%array(altk)
+        do altk = 1, size(indices(i, t)%array)
+          ki = indices(i, t)%array(altk)
 
           mf(i)%array(ki) = (1.0d0-pl) * mf(i)%array(ki)
           mp(i)%array(ki) = (1.0d0-pa) * mp(i)%array(ki)

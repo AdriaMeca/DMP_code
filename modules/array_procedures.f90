@@ -1,6 +1,6 @@
 !> Procedures to create, modify and study arrays.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 module array_procedures
   use derived_types, only: int_list
 
@@ -9,7 +9,7 @@ module array_procedures
   private
 
   interface add
-    module procedure add_dbl, add_int, add_int_list
+    module procedure add_dbl, add_int
   end interface add
 
   interface find
@@ -131,35 +131,6 @@ contains
       list(lb) = element
     end if
   end subroutine add_int
-
-
-  !> Adds a list of integers to a list of lists (of integers).
-  subroutine add_int_list(list, element, lb_)
-    integer,        optional,    intent(in)    :: lb_           !> Lower bound of 'list'.
-    integer                                    :: isize, lb     !>
-    type(int_list),              intent(in)    :: element       !>
-    type(int_list), allocatable, intent(inout) :: list(:)       !>
-    type(int_list), allocatable                :: copy_list(:)  !>
-
-    if (allocated(list)) then
-      lb = lbound(list, dim=1)
-
-      !> We make a copy of the original list, adding the new element to it.
-      isize = size(list)
-      allocate(copy_list(lb:lb+isize))
-      copy_list(lb:lb+isize-1) = list
-      copy_list(lb+isize) = element
-
-      !> We move the elements of the copied list to the original one.
-      call move_alloc(copy_list, list)
-    else
-      lb = merge(lb_, 1, present(lb_))
-
-      !> If the original list has no elements, we add the new element to it.
-      allocate(list(lb:lb))
-      list(lb) = element
-    end if
-  end subroutine add_int_list
 
 
   !> Custom version of GFortran's PACK function that applies to lists of integers.

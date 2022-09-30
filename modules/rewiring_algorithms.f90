@@ -1,9 +1,9 @@
 !> Procedures that rewire the links in a network over time.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 30/09/22.
 module rewiring_algorithms
   use array_procedures,        only: add, find, my_pack
-  use derived_types,           only: int_list, int_llist, node
+  use derived_types,           only: int_list, int_list, node
   use network_properties,      only: internode_distance
   use random_number_generator, only: r1279
 
@@ -24,8 +24,7 @@ contains
     double precision, intent(in)    :: l                     !> Parameter that controls locality.
     double precision, intent(in)    :: Q                     !> Rewiring probability.
     double precision, intent(in)    :: r(:, :)               !> Node positions.
-    type(int_list)                  :: locations             !> Active links of node i at time t.
-    type(int_llist),  intent(inout) :: indices(:)            !> Active links throughout the simulation.
+    type(int_list),   intent(inout) :: indices(:, 0:)        !> Active links throughout the simulation.
     type(node),       intent(inout) :: history(:)            !> Rewiring history.
     type(node),       intent(inout) :: network(:)            !> Original network.
 
@@ -36,10 +35,13 @@ contains
     do i = 1, N
       if (allocated(history(i)%neighbors)) deallocate(history(i)%neighbors)
       if (allocated(history(i)%opposites)) deallocate(history(i)%opposites)
-      if (allocated(indices(i)%time)) deallocate(indices(i)%time)
-
       allocate(history(i)%neighbors(0))
       allocate(history(i)%opposites(0))
+
+      do t = 0, t0
+        if (allocated(indices(i, t)%array)) deallocate(indices(i, t)%array)
+        allocate(indices(i, t)%array(0))
+      end do
     end do
 
     do t = 0, t0
@@ -57,8 +59,6 @@ contains
 
       !> We update 'history' and 'indices'.
       do i = 1, N
-        allocate(locations%array(0))
-
         !> We record every link that node i has had up to time t.
         do altk = 1, size(network(i)%neighbors)
           k = network(i)%neighbors(altk)
@@ -70,16 +70,11 @@ contains
             call add(history(i)%opposites, size(history(k)%neighbors))
             call add(history(k)%opposites, size(history(i)%neighbors))
 
-            call add(locations%array, size(history(i)%neighbors))
+            call add(indices(i, t)%array, size(history(i)%neighbors))
           else
-            call add(locations%array, ki)
+            call add(indices(i, t)%array, ki)
           end if
         end do
-
-        !> We save the active links of node i at time t.
-        call add(indices(i)%time, locations, lb_=0)
-
-        deallocate(locations%array)
       end do
     end do
   end subroutine rewiring
