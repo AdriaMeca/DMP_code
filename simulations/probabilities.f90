@@ -45,7 +45,7 @@ program probabilities
   allocate(nodes(N))
   allocate(states(0:t0+1, N))
   allocate(history(N), indices(N, 0:t0), network(N))
-  allocate(p_dmp(4, 0:t0, N), p_mc(4, 0:t0, N))
+  allocate(p_dmp(N, 0:t0, 4), p_mc(N, 0:t0, 4))
 
   !> Nodes participating in the iteration of the DMP algorithm.
   nodes = [(i, i=1,N)]
@@ -87,13 +87,13 @@ program probabilities
         do i = 1, N
           select case (states(t, i))
             case ('S')
-              p_mc(1, t, i) = p_mc(1, t, i) + 1.0d0
+              p_mc(i, t, 1) = p_mc(i, t, 1) + 1.0d0
             case ('E')
-              p_mc(2, t, i) = p_mc(2, t, i) + 1.0d0
+              p_mc(i, t, 2) = p_mc(i, t, 2) + 1.0d0
             case ('I')
-              p_mc(3, t, i) = p_mc(3, t, i) + 1.0d0
+              p_mc(i, t, 3) = p_mc(i, t, 3) + 1.0d0
             case ('R')
-              p_mc(4, t, i) = p_mc(4, t, i) + 1.0d0
+              p_mc(i, t, 4) = p_mc(i, t, 4) + 1.0d0
           end select
         end do
       end do
@@ -107,7 +107,7 @@ program probabilities
     !> We print the marginal probabilities given by both methods.
     do t = 0, t0
       do i = 1, N
-        print *, t, p_mc([1, 3, 4], t, i), p_dmp([1, 3, 4], t, i)
+        print *, t, p_mc(i, t, [1, 3, 4]), p_dmp(i, t, [1, 3, 4])
       end do
     end do
   end do

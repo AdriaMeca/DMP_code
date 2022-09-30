@@ -51,7 +51,7 @@ contains
 
     allocate(nodes(N))
     allocate(non_S(N))
-    allocate(p(4, 0:t0, N))
+    allocate(p(N, 0:t0, 4))
 
     do while (.true.)
       !> We choose the patient zero(s) uniformly at random.
@@ -93,13 +93,13 @@ contains
       do j = 1, N
         select case (states(t0, j))
           case ('S')
-            joint = joint * p(1, t0, j)
+            joint = joint * p(j, t0, 1)
           case ('E')
-            joint = joint * p(2, t0, j)
+            joint = joint * p(j, t0, 2)
           case ('I')
-            joint = joint * p(3, t0, j)
+            joint = joint * p(j, t0, 3)
           case ('R')
-            joint = joint * p(4, t0, j)
+            joint = joint * p(j, t0, 4)
         end select
 
         !> 'joint' may become so small that GFortran treats it as zero. To avoid

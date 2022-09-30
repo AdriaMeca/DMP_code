@@ -45,8 +45,10 @@ program pz_simulation
   close(10)
 
   allocate(r(N, 2))
+  allocate(history(N))
+  allocate(network(N))
+  allocate(indices(N, 0:t0))
   allocate(states(0:t0+1, N))
-  allocate(history(N), indices(N, 0:t0), network(N))
 
   !> We initialize the epidemiological parameters.
   epi_params = prm(t0, alpha, lambda, mu, nu)

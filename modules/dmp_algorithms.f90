@@ -58,12 +58,12 @@ contains
     end select
 
     !> Initial condition for the marginal probability of being S.
-    p(1, 0, :) = 1.0d0; p(1, 0, patient_zeros) = 0.0d0
+    p(:, 0, 1) = 1.0d0; p(patient_zeros, 0, 1) = 0.0d0
 
     !> Initial conditions for the marginal probabilities of being E, I or R, respectively.
-    p(2, 0, :) = 1.0d0 - p(1, 0, :)
-    p(3, 0, :) = 0.0d0
-    p(4, 0, :) = 0.0d0
+    p(:, 0, 2) = 1.0d0 - p(:, 0, 1)
+    p(:, 0, 3) = 0.0d0
+    p(:, 0, 4) = 0.0d0
 
     !> Initial conditions for the DMP messages.
     do i = 1, N
@@ -78,10 +78,10 @@ contains
       do ki = 1, hsize
         k = history(i)%neighbors(ki)
 
-        mf(i)%array(ki) = p(3, 0, k)
-        mn(i)%array(ki) = p(1, 0, k)
-        mo(i)%array(ki) = p(1, 0, k)
-        mp(i)%array(ki) = p(2, 0, k)
+        mf(i)%array(ki) = p(k, 0, 3)
+        mn(i)%array(ki) = p(k, 0, 1)
+        mo(i)%array(ki) = p(k, 0, 1)
+        mp(i)%array(ki) = p(k, 0, 2)
         mt(i)%array(ki) = 1.0d0
       end do
     end do
@@ -104,20 +104,20 @@ contains
           end do
 
           !> We calculate the probability that node i is S at time t.
-          p(1, t, i) = p(1, 0, i) * product(mt(i)%array)
+          p(i, t, 1) = p(i, 0, 1) * product(mt(i)%array)
 
           !> We update the npses that leave node i at time t.
           do ki = 1, size(history(i)%neighbors)
             k = history(i)%neighbors(ki); ik = history(i)%opposites(ki)
 
             if (mt(i)%array(ki) > 0.0d0) then
-              mn(k)%array(ik) = p(1, t, i) / mt(i)%array(ki)
+              mn(k)%array(ik) = p(i, t, 1) / mt(i)%array(ki)
             else
-              mn(k)%array(ik) = p(1, 0, i) * product(pop(mt(i)%array, ki))
+              mn(k)%array(ik) = p(i, 0, 1) * product(pop(mt(i)%array, ki))
             end if
           end do
         else
-          p(1, t, i) = p(1, t-1, i)
+          p(i, t, 1) = p(i, t-1, 1)
         end if
       end do
 
@@ -138,15 +138,15 @@ contains
         mo(i)%array = mn(i)%array
 
         !> We compute the probabilities that node i is R or I at time t, respectively.
-        p(4, t, i) = p(4, t-1, i) + pm*p(3, t-1, i)
-        p(3, t, i) = p(3, t-1, i) - pm*p(3, t-1, i) + pn*p(2, t-1, i)
+        p(i, t, 3) = p(i, t-1, 3) - pm*p(i, t-1, 3) + pn*p(i, t-1, 2)
+        p(i, t, 4) = p(i, t-1, 4) + pm*p(i, t-1, 3)
 
         !> We compute the probability that node i is E at time t.
-        p(2, t, i) = 1.0d0 - p(1, t, i) - p(3, t, i) - p(4, t, i)
+        p(i, t, 2) = 1.0d0 - p(i, t, 1) - p(i, t, 3) - p(i, t, 4)
       end do
     end do
 
     !> For the SIR model, we must perform the following exchanges:
-    if (trim(model) == 'SIR') p(3:4, :, :) = p(2:3, :, :); p(2, :, :) = 0.0d0
+    if (trim(model) == 'SIR') p(:, :, 3:4) = p(:, :, 2:3); p(:, :, 2) = 0.0d0
   end subroutine dmp_alg
 end module dmp_algorithms
