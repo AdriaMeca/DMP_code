@@ -76,59 +76,49 @@ contains
 
 
   !> Adds a double to an array of doubles.
-  subroutine add_dbl(list, element, lb_)
-    integer,          optional,    intent(in)    :: lb_           !> Lower bound of 'list'.
-    integer                                      :: isize, lb     !>
+  subroutine add_dbl(list, element)
+    integer                                      :: isize         !>
     double precision,              intent(in)    :: element       !>
     double precision, allocatable, intent(inout) :: list(:)       !>
     double precision, allocatable                :: copy_list(:)  !>
 
     if (allocated(list)) then
-      lb = lbound(list, dim=1)
-
       !> We make a copy of the original list, adding the new element to it.
       isize = size(list)
-      allocate(copy_list(lb:lb+isize))
-      copy_list(lb:lb+isize-1) = list
-      copy_list(lb+isize) = element
+      allocate(copy_list(1+isize))
+      copy_list(1:isize) = list
+      copy_list(1+isize) = element
 
       !> We move the elements of the copied list to the original one.
       call move_alloc(copy_list, list)
     else
-      lb = merge(lb_, 1, present(lb_))
-
       !> If the original list has no elements, we add the new element to it.
-      allocate(list(lb:lb))
-      list(lb) = element
+      allocate(list(1))
+      list(1) = element
     end if
   end subroutine add_dbl
 
 
   !> Adds an integer to an array of integers.
-  subroutine add_int(list, element, lb_)
+  subroutine add_int(list, element)
     integer,              intent(in)    :: element       !>
-    integer, optional,    intent(in)    :: lb_           !> Lower bound of 'list'.
     integer, allocatable, intent(inout) :: list(:)       !>
     integer, allocatable                :: copy_list(:)  !>
-    integer                             :: isize, lb     !>
+    integer                             :: isize         !>
 
     if (allocated(list)) then
-      lb = lbound(list, dim=1)
-
       !> We make a copy of the original list, adding the new element to it.
       isize = size(list)
-      allocate(copy_list(lb:lb+isize))
-      copy_list(lb:lb+isize-1) = list
-      copy_list(lb+isize) = element
+      allocate(copy_list(1+isize))
+      copy_list(1:isize) = list
+      copy_list(1+isize) = element
 
       !> We move the elements of the copied list to the original one.
       call move_alloc(copy_list, list)
     else
-      lb = merge(lb_, 1, present(lb_))
-
       !> If the original list has no elements, we add the new element to it.
-      allocate(list(lb:lb))
-      list(lb) = element
+      allocate(list(1))
+      list(1) = element
     end if
   end subroutine add_int
 
