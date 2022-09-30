@@ -48,7 +48,7 @@ program pz_simulation
   allocate(history(N))
   allocate(network(N))
   allocate(indices(N, 0:t0))
-  allocate(states(0:t0+1, N))
+  allocate(states(N, 0:t0+1))
 
   !> We initialize the epidemiological parameters.
   epi_params = prm(t0, alpha, lambda, mu, nu)
@@ -96,10 +96,10 @@ program pz_simulation
     r0 = find(non_S, tpz) - 1
 
     !> We compute the time t1 at which the predicted patient zero got infected.
-    t1 = find(states(:, ppz), 'I') - 1
+    t1 = find(states(ppz, :), 'I') - 1
 
     !> We compute the time t2 at which the true patient zero recovered.
-    t2 = find(states(:, tpz), 'R') - 1
+    t2 = find(states(tpz, :), 'R') - 1
 
     !> Energies.
     open(unit=15, file='pz_simulation'//'_energies.dat', position='append')
@@ -118,11 +118,11 @@ program pz_simulation
       t1,                                                                      &
       t2,                                                                      &
       merge(1, 0, any(history(ppz)%neighbors(indices(ppz, t1)%array) == tpz)), &
-      count(states(t0, :) == 'I'),                                             &
-      count(states(t0, :) == 'R'),                                             &
-      count(states(t1, :) == 'I'),                                             &
-      count(states(t1, :) == 'R'),                                             &
-      count(states(t2, :) == 'I'),                                             &
-      count(states(t2, :) == 'R')
+      count(states(:, t0) == 'I'),                                             &
+      count(states(:, t0) == 'R'),                                             &
+      count(states(:, t1) == 'I'),                                             &
+      count(states(:, t1) == 'R'),                                             &
+      count(states(:, t2) == 'I'),                                             &
+      count(states(:, t2) == 'R')
   end do
 end program pz_simulation

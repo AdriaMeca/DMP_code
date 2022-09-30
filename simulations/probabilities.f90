@@ -43,7 +43,7 @@ program probabilities
 
   allocate(r(N, 2))
   allocate(nodes(N))
-  allocate(states(0:t0+1, N))
+  allocate(states(N, 0:t0+1))
   allocate(history(N), indices(N, 0:t0), network(N))
   allocate(p_dmp(N, 0:t0, 4), p_mc(N, 0:t0, 4))
 
@@ -85,7 +85,7 @@ program probabilities
 
       do t = 0, t0
         do i = 1, N
-          select case (states(t, i))
+          select case (states(i, t))
             case ('S')
               p_mc(i, t, 1) = p_mc(i, t, 1) + 1.0d0
             case ('E')

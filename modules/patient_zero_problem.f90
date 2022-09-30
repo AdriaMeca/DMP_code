@@ -33,7 +33,7 @@ contains
     integer                                    :: epi_size                 !> Epidemic size.
     integer                                    :: i, idx, j, N, t0, total  !>
     character(len=*),              intent(in)  :: model                    !> Epidemiological model.
-    character(len=1),              intent(out) :: states(0:, :)            !> Distribution of node states.
+    character(len=1),              intent(out) :: states(:, 0:)            !> Distribution of node states.
     double precision, allocatable, intent(out) :: energies(:)              !> Node energies.
     double precision, allocatable              :: p(:, :, :)               !> DMP marginal probabilities.
     double precision, parameter                :: small = 1.0d-300         !>
@@ -61,12 +61,12 @@ contains
       call mc_sim(model, history, indices, patient_zeros, epi_params, states)
 
       !> If the epidemic spread, we exit the loop. Otherwise, we start over.
-      if (count(states(t0, :) /= 'S') > 1) exit
+      if (count(states(:, t0) /= 'S') > 1) exit
     end do
 
     !> Only non-susceptible nodes may have started the epidemic.
     nodes = [(i, i=1,N)]
-    non_S = nodes; call my_pack(non_S, states(t0, :) /= 'S')
+    non_S = nodes; call my_pack(non_S, states(:, t0) /= 'S')
 
     !> Each non-susceptible node has an energy that quantifies its likelihood of
     !> being the true patient zero.
@@ -91,7 +91,7 @@ contains
       total = 0
       joint = 1.0d0
       do j = 1, N
-        select case (states(t0, j))
+        select case (states(j, t0))
           case ('S')
             joint = joint * p(j, t0, 1)
           case ('E')

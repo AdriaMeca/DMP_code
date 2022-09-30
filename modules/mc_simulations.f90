@@ -17,7 +17,7 @@ contains
     integer,          intent(in)  :: patient_zeros(:)      !>
     integer                       :: altk, i, k, N, t, t0  !>
     character(len=*), intent(in)  :: model                 !> Epidemiological model.
-    character(len=1), intent(out) :: states(0:, :)         !> Distribution of node states.
+    character(len=1), intent(out) :: states(:, 0:)         !> Distribution of node states.
     double precision              :: p1, p2, r             !>
     double precision              :: pa, pl, pm, pn        !>
     type(int_list),   intent(in)  :: indices(:, 0:)        !> Active links throughout the simulation.
@@ -45,14 +45,14 @@ contains
     end select
 
     !> We initialize the distribution of node states.
-    states = 'S'; states(:, patient_zeros) = 'E'
+    states = 'S'; states(patient_zeros, :) = 'E'
 
     !> We generate an epidemic by simulating the S(E)IR rules with MC up to t0.
     do t = 1, t0
       do i = 1, N
         r = r1279()
 
-        select case (states(t, i))
+        select case (states(i, t))
           case ('S')
             p1 = 1.0d0
             p2 = 1.0d0
@@ -60,23 +60,23 @@ contains
             do altk = 1, size(indices(i, t)%array)
               k = history(i)%neighbors(indices(i, t)%array(altk))
 
-              p1 = p1 * (1.0d0 - pa*merge(1.0d0, 0.0d0, states(t, k) == 'E'))
-              p2 = p2 * (1.0d0 - pl*merge(1.0d0, 0.0d0, states(t, k) == 'I'))
+              p1 = p1 * (1.0d0 - pa*merge(1.0d0, 0.0d0, states(k, t) == 'E'))
+              p2 = p2 * (1.0d0 - pl*merge(1.0d0, 0.0d0, states(k, t) == 'I'))
             end do
 
             p1 = 1.0d0 - p1
             p2 = 1.0d0 - p2
 
-            if (r < p1+p2) states(t+1:, i) = 'E'
+            if (r < p1+p2) states(i, t+1:) = 'E'
           case ('E')
-            if (r < pn) states(t+1:, i) = 'I'
+            if (r < pn) states(i, t+1:) = 'I'
           case ('I')
-            if (r < pm) states(t+1:, i) = 'R'
+            if (r < pm) states(i, t+1:) = 'R'
         end select
       end do
 
       !> We update the state of all nodes at the end of each time step.
-      states(t, :) = states(t+1, :)
+      states(:, t) = states(:, t+1)
     end do
 
     !> For the SIR model, we must perform the following exchanges:
