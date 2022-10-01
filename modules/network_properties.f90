@@ -1,6 +1,7 @@
 !> Procedures for studying the properties of networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 module network_properties
   use derived_types, only: node
 
@@ -42,8 +43,8 @@ contains
     double precision             :: L, xij, yij         !>
     logical,          intent(in) :: pbc                 !> (F) T: (do not) use PBC to compute the distance.
 
-    xij = r(j, 1) - r(i, 1)
-    yij = r(j, 2) - r(i, 2)
+    xij = r(1, j) - r(1, i)
+    yij = r(2, j) - r(2, i)
 
     if (pbc) then
       !> Number of nodes.
@@ -82,7 +83,7 @@ contains
 
     !> We write the positions of the nodes.
     do i = 1, N
-      write(*, '(2es26.16)') r(i, :)
+      write(*, '(2es26.16)') r(:, i)
     end do
     write(*, '(a)') achar(10)
 
@@ -91,7 +92,7 @@ contains
     do i = 1, N
       do ki = 1, size(network(i)%neighbors)
         k = network(i)%neighbors(ki)
-        write(*, '(4es26.16)') r(i, :), r(k, :) - r(i, :)
+        write(*, '(4es26.16)') r(:, i), r(:, k) - r(:, i)
       end do
     end do
     write(*, '(a)') achar(10)

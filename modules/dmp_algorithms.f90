@@ -1,7 +1,8 @@
 !> Procedures for computing the marginal probabilities that each node in a time-
 !> varying network is in states S, E, I or R at times t <= t0.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 30/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 module dmp_algorithms
   use array_procedures, only: my_pack, pop
   use derived_types,    only: dbl_list, int_list, node, prm
@@ -137,7 +138,7 @@ contains
         !> We update the opses that enter node i at time t.
         mo(i)%array = mn(i)%array
 
-        !> We compute the probabilities that node i is R or I at time t, respectively.
+        !> We compute the probabilities that node i is I or R at time t, respectively.
         p(i, t, 3) = p(i, t-1, 3) - pm*p(i, t-1, 3) + pn*p(i, t-1, 2)
         p(i, t, 4) = p(i, t-1, 4) + pm*p(i, t-1, 3)
 

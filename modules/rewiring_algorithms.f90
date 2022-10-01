@@ -1,9 +1,10 @@
 !> Procedures that rewire the links in a network over time.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 30/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 module rewiring_algorithms
   use array_procedures,        only: add, find, my_pack
-  use derived_types,           only: int_list, int_list, node
+  use derived_types,           only: int_list, node
   use network_properties,      only: internode_distance
   use random_number_generator, only: r1279
 
@@ -37,11 +38,6 @@ contains
       if (allocated(history(i)%opposites)) deallocate(history(i)%opposites)
       allocate(history(i)%neighbors(0))
       allocate(history(i)%opposites(0))
-
-      do t = 0, t0
-        if (allocated(indices(i, t)%array)) deallocate(indices(i, t)%array)
-        allocate(indices(i, t)%array(0))
-      end do
     end do
 
     do t = 0, t0
@@ -59,6 +55,9 @@ contains
 
       !> We update 'history' and 'indices'.
       do i = 1, N
+        if (allocated(indices(i, t)%array)) deallocate(indices(i, t)%array)
+        allocate(indices(i, t)%array(0))
+
         !> We record every link that node i has had up to time t.
         do altk = 1, size(network(i)%neighbors)
           k = network(i)%neighbors(altk)

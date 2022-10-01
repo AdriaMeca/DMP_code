@@ -1,7 +1,8 @@
 !> Simulation that tests the efficiency with which the DMP-based inference algorithm
 !> locates the true patient zero of an epidemic.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 30/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 program pz_simulation
   use array_procedures,        only: find
   use derived_types,           only: int_list, node, prm
@@ -44,11 +45,9 @@ program pz_simulation
     read(10, *) alpha, lambda, mu, nu, t0  !> Epidemiological parameters.
   close(10)
 
-  allocate(r(N, 2))
-  allocate(history(N))
-  allocate(network(N))
-  allocate(indices(N, 0:t0))
-  allocate(states(N, 0:t0+1))
+  allocate(r(2, N))
+  allocate(history(N), network(N))
+  allocate(indices(N, 0:t0), states(N, 0:t0+1))
 
   !> We initialize the epidemiological parameters.
   epi_params = prm(t0, alpha, lambda, mu, nu)
@@ -64,7 +63,7 @@ program pz_simulation
     select case (trim(graph))
       case ('PN')
         !> We initialize the node positions.
-        r = sqrt(dble(N)) * reshape([(r1279(), i=1,2*N)], [N, 2])
+        r = sqrt(dble(N)) * reshape([(r1279(), i=1,2*N)], [2, N])
 
         network = PN(N, c, r, l)
       case ('RRG')

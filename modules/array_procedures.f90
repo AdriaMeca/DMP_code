@@ -1,6 +1,7 @@
 !> Procedures to create, modify and study arrays.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 30/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 module array_procedures
   use derived_types, only: int_list
 
@@ -88,6 +89,7 @@ contains
       allocate(copy_list(1+isize))
       copy_list(1:isize) = list
       copy_list(1+isize) = element
+      deallocate(list)
 
       !> We move the elements of the copied list to the original one.
       call move_alloc(copy_list, list)
@@ -112,6 +114,7 @@ contains
       allocate(copy_list(1+isize))
       copy_list(1:isize) = list
       copy_list(1+isize) = element
+      deallocate(list)
 
       !> We move the elements of the copied list to the original one.
       call move_alloc(copy_list, list)
@@ -125,31 +128,23 @@ contains
 
   !> Custom version of GFortran's PACK function that applies to lists of integers.
   subroutine my_pack_int(list, condition)
-    integer, allocatable, intent(inout) :: list(:)                   !>
-    integer, allocatable                :: copy_list(:)              !>
-    integer                             :: i, j, new_size, old_size  !>
-    logical,              intent(in)    :: condition(:)              !>
-
-    if (.not. allocated(list)) then
-      print *, 'An attempt was made to filter an unallocated list.'
-      return
-    end if
+    integer, allocatable, intent(inout) :: list(:)         !>
+    integer, allocatable                :: copy_list(:)    !>
+    integer                             :: i, j, new_size  !>
+    logical,              intent(in)    :: condition(:)    !>
 
     !> We make a copy of the original list.
-    old_size = size(list)
-    allocate(copy_list(old_size))
-    copy_list = list
+    call move_alloc(list, copy_list)
 
     !> The new size of the original list is equal to the number of elements that
     !> meet the condition.
     new_size = count(condition)
-    deallocate(list)
     allocate(list(new_size))
 
     !> We construct the new list.
     if (new_size > 0) then
       j = 1
-      do i = 1, old_size
+      do i = 1, size(condition)
         if (condition(i)) then
           list(j) = copy_list(i)
           j = j + 1

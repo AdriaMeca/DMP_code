@@ -1,6 +1,7 @@
 !> Procedures for generating random numbers.
 !> Authors: Matteo Palassini and Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 module random_number_generator
   implicit none
 

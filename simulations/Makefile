@@ -1,5 +1,6 @@
 # Author: Adria Meca Montserrat.
-# Last modified date: 03/09/22.
+# Last modified date: 01/10/22.
+# Last reviewed date: 01/10/22.
 
 # Command line arguments.
 ifeq ($(name),)
@@ -39,7 +40,7 @@ else ifeq ($(mode), pz_simulation)
 endif
 
 # Compilation flags.
-options := -I $(mod_dir) -J $(mod_dir) -g -Wall -Wextra -pedantic -std=f2003 -O3
+options := -I $(mod_dir) -J $(mod_dir) -g -fcheck=all -Wall -Wextra -pedantic -std=f2003 -O3
 
 # Modules of interest and their resulting object files.
 sources := $(wildcard $(modules)*.f90)

@@ -1,6 +1,7 @@
 !> Procedures that generate networks of different types.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 03/09/22.
+!> Last modified date: 01/10/22.
+!> Last reviewed date: 01/10/22.
 module network_generation
   use array_procedures,        only: add, my_pack
   use derived_types,           only: node
@@ -68,10 +69,12 @@ contains
     !> Warning: N * c must be an even number, otherwise the network cannot be closed
     !> and we are stuck in an infinite loop.
     do while (.true.)
-      allocate(array_u(N*c), array_v(N*c))
+      if (allocated(array_u)) deallocate(array_u); allocate(array_u(N*c))
+      if (allocated(array_v)) deallocate(array_v); allocate(array_v(N*c))
 
       !> Step 1: we initialize the network and the arrays.
       do idx_i = 1, N
+        if (allocated(RRG(idx_i)%neighbors)) deallocate(RRG(idx_i)%neighbors)
         allocate(RRG(idx_i)%neighbors(0))
 
         do idx_j = 1, c
@@ -122,14 +125,8 @@ contains
         call add(RRG(v)%neighbors, u)
       end do
 
-      !> If there are no connectors available, we are done.
+      !> We exit the loop when the connectors run out. Otherwise, we start over.
       if (usize == 0) exit
-
-      !> If the attempt fails, we have to deallocate everything and start over.
-      deallocate(array_u, array_v)
-      do idx_i = 1, N
-        deallocate(RRG(idx_i)%neighbors)
-      end do
     end do
   end function RRG
 end module network_generation
