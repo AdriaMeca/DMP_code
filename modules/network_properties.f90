@@ -1,7 +1,7 @@
 !> Procedures for studying the properties of networks.
 !> Author: Adria Meca Montserrat.
-!> Last modified date: 01/10/22.
-!> Last reviewed date: 01/10/22.
+!> Last modified date: 02/10/22.
+!> Last reviewed date: 02/10/22.
 module network_properties
   use derived_types, only: node
 
@@ -74,9 +74,9 @@ contains
 
   !> Returns the information that Gnuplot needs to draw a network.
   subroutine draw_network(network, r)
-    integer                      :: i, k, ki, N  !>
-    double precision, intent(in) :: r(:, :)      !> Node positions.
-    type(node),       intent(in) :: network(:)   !>
+    integer                      :: i, k, N     !>
+    double precision, intent(in) :: r(:, :)     !> Node positions.
+    type(node),       intent(in) :: network(:)  !>
 
     !> Number of nodes.
     N = size(network)
@@ -90,10 +90,13 @@ contains
     !> Writing (xi, yi) and (xk-xi, yk-yi) allows Gnuplot to draw a vector between
     !> nodes i and k.
     do i = 1, N
-      do ki = 1, size(network(i)%neighbors)
-        k = network(i)%neighbors(ki)
-        write(*, '(4es26.16)') r(:, i), r(:, k) - r(:, i)
-      end do
+      if (size(network(i)%neighbors) > 0) then
+        do k = i+1, N
+          if (any(network(i)%neighbors == k)) then
+            write(*, '(4es26.16)') r(:, i), r(:, k) - r(:, i)
+          end if
+        end do
+      end if
     end do
     write(*, '(a)') achar(10)
   end subroutine draw_network
